@@ -15,6 +15,9 @@ $(TARGET_LIB): LDFLAGS += -Wl,--no-undefined
 $(TARGET_LIB): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
+%: $(TARGET_LIB)
+	LD_PRELOAD=$(TARGET_LIB) ./$@
+
 debug: CFLAGS += -g
 debug: clean $(TARGET_LIB)
 
