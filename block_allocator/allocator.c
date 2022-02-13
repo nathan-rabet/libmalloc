@@ -13,14 +13,16 @@ struct blk_allocator *blka_new(void)
     return calloc(1, sizeof(struct blk_allocator));
 }
 
-static size_t ceil_to_page(size_t n)
+static inline size_t ceil_to_page(size_t n)
 {
-    return n + (sysconf(_SC_PAGE_SIZE) - MODP(n, sysconf(_SC_PAGE_SIZE)));
+    return n % sysconf(_SC_PAGE_SIZE) == 0
+        ? n
+        : n + (sysconf(_SC_PAGE_SIZE) - MODP(n, sysconf(_SC_PAGE_SIZE)));
 }
 
 struct blk_meta *blka_alloc(struct blk_allocator *blka, size_t size)
 {
-    if (blka)
+    if (blka && size)
     {
         if (blka->meta)
             blka->meta->next = blka->meta;
