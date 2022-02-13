@@ -22,15 +22,17 @@ static inline size_t ceil_to_page(size_t n)
 
 struct blk_meta *blka_alloc(struct blk_allocator *blka, size_t size)
 {
-    if (blka && size)
+    if (blka)
     {
-        if (blka->meta)
-            blka->meta->next = blka->meta;
-        blka->meta = mmap(NULL, size, PROT_READ | PROT_WRITE,
-                          MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+        struct blk_meta *last_blk = blka->meta;
+        blka->meta =
+            mmap(NULL, sizeof(struct blk_meta *) + sizeof(size_t) + size,
+                 PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 
+        blka->meta->next = last_blk;
         blka->meta->size =
-            ceil_to_page(size) - (sizeof(struct blk_meta *) + sizeof(size_t));
+            ceil_to_page(sizeof(struct blk_meta *) + sizeof(size_t) + size)
+            - (sizeof(struct blk_meta *) + sizeof(size_t));
 
         return blka->meta;
     }
