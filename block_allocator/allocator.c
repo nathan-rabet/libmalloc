@@ -1,6 +1,5 @@
 #include "allocator.h"
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,14 +28,9 @@ struct blk_meta *blka_alloc(struct blk_allocator *blka, size_t size)
             mmap(NULL, sizeof(struct blk_meta *) + sizeof(size_t) + size,
                  PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 
-        if ((void *)-1 == blka->meta)
-        {
-            printf("Could not map memory: %s\n", strerror(errno));
-        }
-
         blka->meta->size =
             ceil_to_page(sizeof(struct blk_meta *) + sizeof(size_t) + size)
-            - (sizeof(struct blk_meta *) + sizeof(size_t));
+            - (sizeof(struct blk_meta *) + sizeof(size_t) + size) + size;
 
         return blka->meta;
     }
