@@ -1,6 +1,6 @@
 CC = gcc
 CPPFLAGS = -D_DEFAULT_SOURCE
-CFLAGS = -Wall -Wextra -Werror -std=c99 -fPIC -fno-builtin
+CFLAGS = -Wall -Wextra -Werror -std=c99 -fPIC -fno-builtin -Iinclude
 LDFLAGS = -shared
 VPATH = src
 
