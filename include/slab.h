@@ -7,8 +7,7 @@
 #include "bit.h"
 #include "cache.h"
 
-#define byte_t unsigned char // used in `slab_data`
-#define CANARY_MAGIC 0xFFC01C01 // "coin coin"
+#    define CANARY_MAGIC 0xFCC01C01 // sounds like "FC coin coin"
 
 /**
  * @brief A slab_group is a collection of slabs with the same size.
@@ -52,3 +51,64 @@ struct slab_data
 };
 
 #endif /* SLAB_GROUP_H */
+
+/**
+ * @brief Allocate a slab group of the given size multiplicity.
+ *
+ * @note The linked list of slab groups is sorted by size multiplicity.
+ *
+ * @param size_multiplicity The size multiplicity of the slab group to allocate.
+ * @param linked_slab_group The actual linked list of slab groups.
+ * @return struct slab_group* The new slab group head, or NULL in case of error.
+ */
+struct slab_group *slab_group_create(uint8_t size_multiplicity,
+                                     struct slab_group *linked_slab_group);
+
+/**
+ * @brief Destroy a slab group.
+ *
+ * @param slab_group The slab group to destroy.
+ *
+ * @return struct slab_group* The new slab group head, or NULL in case of error.
+ */
+struct slab_group *slab_group_destroy(struct slab_group *slab_group);
+
+/**
+ * @brief Allocate a slab meta page.
+ *
+ * @param linked_slab_meta The actual linked list of slab meta.
+ * @return struct slab_meta* The new slab meta head, or NULL in case of error.
+ */
+struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta);
+
+/**
+ * @brief Destroy a slab meta page.
+ *
+ * @param slab_meta The slab meta to destroy.
+ * @return struct slab_meta* The new slab meta head, or NULL in case of error.
+ */
+struct slab_meta *slab_meta_destroy(struct slab_meta *slab_meta);
+
+/**
+ * @brief Initialize a slab header data (canary, slab_meta).
+ *
+ * @param slab_meta The slab meta to initialize.
+ * @return struct slab_data*
+ */
+void slab_data_init(struct slab_meta *slab_meta);
+
+/**
+ * @brief Verify a slab header data validity (canary, slab_meta).
+ *
+ * @param slab_data The slab data to verify.
+ * @return true if the slab is valid, false otherwise.
+ */
+bool coin_coin(struct slab_data *slab_data);
+
+/**
+ * @brief Get the slab data header object
+ *
+ * @param user_data The user data to get the slab data header from.
+ * @return struct slab_data* The slab data header.
+ */
+struct slab_data *get_slab_data_header(byte_t *user_data);

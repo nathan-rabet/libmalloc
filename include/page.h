@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <unistd.h>
 
+#define PAGE_SIZE() (sysconf(_SC_PAGE_SIZE))
+
 /**
  * @brief Fit the given size to page ceil.
  *
@@ -12,9 +14,7 @@
  */
 static inline size_t ceil_to_page(size_t n)
 {
-    return n % sysconf(_SC_PAGE_SIZE) == 0
-        ? n
-        : n + (sysconf(_SC_PAGE_SIZE) - (n % sysconf(_SC_PAGE_SIZE)));
+    return n % PAGE_SIZE() == 0 ? n : n + (PAGE_SIZE() - (n % PAGE_SIZE()));
 }
 
 /**
@@ -25,7 +25,7 @@ static inline size_t ceil_to_page(size_t n)
  */
 static inline size_t floor_to_page(size_t n)
 {
-    return n & (~(sysconf(_SC_PAGE_SIZE) - 1));
+    return n & (~(PAGE_SIZE() - 1));
 }
 
 /**
@@ -36,7 +36,7 @@ static inline size_t floor_to_page(size_t n)
  */
 static inline void *page_begin(void *ptr)
 {
-    return (void *)((size_t)ptr & (~(sysconf(_SC_PAGE_SIZE) - 1)));
+    return (void *)((size_t)ptr & (~(PAGE_SIZE() - 1)));
 }
 
 #endif /* PAGE_H */
