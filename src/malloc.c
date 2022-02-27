@@ -8,8 +8,7 @@ void *malloc(size_t size)
 
 __attribute__((visibility("default")))
 void free(void *ptr)
-{
-}
+{}
 
 __attribute__((visibility("default")))
 void *realloc(void *ptr, size_t size)
