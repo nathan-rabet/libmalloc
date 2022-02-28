@@ -3,13 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "bit.h"
+#include "slab.h"
 
 int main(void)
 {
-    byte_t buffer = 0b00000001;
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
 
-    get_bit(&buffer, 7);
+    // Delete group
+    group->next->next = slab_group_delete(group->next->next);
 
     return 0;
 }

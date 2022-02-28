@@ -4,6 +4,17 @@
 #include <stdint.h>
 
 /**
+ * @brief The data of a slab cache.
+ *
+ */
+struct slab_cache_data
+{
+    struct slab_group *slab_group; // Slab group
+    struct slab_meta *slab_meta; // Slab meta
+    uint64_t free_bit_index; // Free bit index
+};
+
+/**
  * @brief Cache used in a slab_group.
  *
  * It is used to store a free slab meta in order to access it faster.
@@ -13,17 +24,6 @@ struct slab_cache
 {
     uint8_t nb_cached_slabs : 2; // Number of cached slabs (0-3)
     struct slab_cache_data cached_slabs[3]; // Cached slabs (0-3)
-};
-
-/**
- * @brief The data of a slab cache.
- *
- */
-struct slab_cache_data
-{
-    struct slab_group *slab_group; // Slab group
-    struct slab_meta *slab_meta; // Slab meta
-    uint64_t free_bit_index; // Free bit index
 };
 
 /**

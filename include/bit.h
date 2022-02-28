@@ -2,8 +2,9 @@
 #define BIT_H
 
 #include <stddef.h>
+#include <stdint.h>
 
-typedef unsigned char byte_t; // Byte type
+typedef uint8_t byte_t; // Byte type
 #define BYTES_TO_BITS(NB_BYTES) ((NB_BYTES)*8)
 #define BITS_TO_BYTES(NB_BITS) ((NB_BITS) / 8)
 

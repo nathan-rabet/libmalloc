@@ -28,6 +28,8 @@ struct slab_group
  */
 struct slab_meta
 {
+    struct slab_group
+        *common_group; // Common slab group of the linked slabs meta
     struct slab_meta *prev; // Previous slab meta
     struct slab_meta *next; // Next slab meta
     struct slab_data *slabs_data; // Slabs data
@@ -52,6 +54,14 @@ struct slab_data
 };
 
 /**
+ * @brief Return 2 ^ `size_multiplicity`
+ *
+ * @param multiplicity The multiplicity to compute.
+ * @return size_t The result.
+ */
+size_t get_group_size(uint8_t multiplicity);
+
+/**
  * @brief Allocate a slab group of the given size multiplicity.
  *
  * @note The linked list of slab groups is sorted by size multiplicity.
@@ -64,13 +74,20 @@ struct slab_group *slab_group_create(uint8_t size_multiplicity,
                                      struct slab_group *linked_slab_group);
 
 /**
- * @brief Destroy a slab group.
+ * @brief Delete a slab group and refactor the linked list of slab groups.
  *
  * @param slab_group The slab group to destroy.
  *
  * @return struct slab_group* The new slab group head, or NULL in case of error.
  */
-struct slab_group *slab_group_destroy(struct slab_group *slab_group);
+struct slab_group *slab_group_delete(struct slab_group *slab_group);
+
+/**
+ * @brief Destroy all the slab groups.
+ *
+ * @param slab_group The head of the linked list of slab groups.
+ */
+void slab_group_destroy_all(struct slab_group *slab_group);
 
 /**
  * @brief Allocate (sorted) a slab meta page.
