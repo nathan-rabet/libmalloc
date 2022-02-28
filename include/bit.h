@@ -11,9 +11,10 @@
  *
  * @param buffer The buffer to get the bit from.
  * @param bit_index The index of the bit to get.
- * @return byte_t The bit at the given position as a byte_t.
+ * @return byte_t The bit at the given position as a byte_t,
+ * 0xFF if buffer is NULL.
  */
-byte_t get_bit_buffer(byte_t *buffer, int bit_index);
+byte_t get_bit_buffer(byte_t *buffer, size_t bit_index);
 
 /**
  * @brief Set the one bit at the given position.
@@ -22,6 +23,6 @@ byte_t get_bit_buffer(byte_t *buffer, int bit_index);
  * @param value The value to set the bit to (0 or 1).
  * @param bit_index The index of the bit to set.
  */
-void set_bit_buffer(byte_t *buffer, byte_t value, int bit_index);
+void set_bit_buffer(byte_t *buffer, byte_t value, size_t bit_index);
 
 #endif /* BIT_H */

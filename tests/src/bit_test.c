@@ -2,21 +2,32 @@
 
 #include "bit.h"
 
+Test(get_bit, null_safety)
+{
+    cr_assert_eq(get_bit_buffer(NULL, 0), 0xFF);
+}
+
+Test(get_bit, get_prev_bit)
+{
+    byte_t buffer[] = { 0x00, 0xFF };
+
+    cr_assert_eq(get_bit_buffer(&buffer[1], -1), 0b0);
+}
+
 Test(get_bit, get_bit_0b0)
 {
     byte_t buffer = 0b0;
 
     for (size_t i = 0; i < 8; i++)
-        cr_assert_eq(get_bit(buffer, i), 0, "get_bit(0b0, %zu) != 0", i);
+        cr_assert_eq(get_bit_buffer(buffer, i), 0, "get_bit(0b0, %zu) != 0", i);
 }
 
 Test(get_bit, get_bit_0b1)
 {
     byte_t buffer = 0b1;
 
-    cr_assert_eq(get_bit_buffer(&buffer, 0), 1);
     for (size_t i = 1; i < 8; i++)
-        cr_assert_eq(get_bit(buffer, i), 0, "get_bit(0b1, %zu) != 0", i);
+        cr_assert_eq(get_bit_buffer(buffer, i), 0, "get_bit(0b1, %zu) != 0", i);
 }
 
 Test(get_bit, get_bit_0b101_0)
@@ -91,6 +102,30 @@ Test(get_bit, get_bit_BIG_buffer)
     cr_assert_eq(get_bit_buffer(buffer, 69), 0);
     cr_assert_eq(get_bit_buffer(buffer, 70), 0);
     cr_assert_eq(get_bit_buffer(buffer, 71), 0);
+}
+
+Test(set_bit, null_safety)
+{
+    // Must not crash
+    set_bit_buffer(NULL, 0, 0);
+}
+
+Test(get_bit, set_prev_bit)
+{
+    byte_t buffer[] = { 0x00, 0xFF };
+
+    set_bit_buffer(&buffer[1], 1, -1);
+    cr_assert_eq(buffer[0], 0x1);
+    cr_assert_eq(buffer[1], 0xFF);
+}
+
+Test(get_bit, set_invalid_value)
+{
+    byte_t buffer = 0b0;
+
+    set_bit_buffer(&buffer, 666, 1);
+
+    cr_assert_eq(buffer, 0b0);
 }
 
 Test(set_bit, set_0b0_first)
