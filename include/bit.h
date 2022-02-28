@@ -3,8 +3,9 @@
 
 #include <stddef.h>
 
-#define byte_t unsigned char // Byte type
-#define GET_BITS_SIZE(NB_BYTES) ((NB_BYTES)*8)
+typedef unsigned char byte_t; // Byte type
+#define BYTES_TO_BITS(NB_BYTES) ((NB_BYTES)*8)
+#define BITS_TO_BYTES(NB_BITS) ((NB_BITS) / 8)
 
 /**
  * @brief Get the one bit at the given position.
@@ -14,7 +15,7 @@
  * @return byte_t The bit at the given position as a byte_t,
  * 0xFF if buffer is NULL.
  */
-byte_t get_bit_buffer(byte_t *buffer, size_t bit_index);
+byte_t get_bit(byte_t *buffer, size_t bit_index);
 
 /**
  * @brief Set the one bit at the given position.
@@ -23,6 +24,6 @@ byte_t get_bit_buffer(byte_t *buffer, size_t bit_index);
  * @param value The value to set the bit to (0 or 1).
  * @param bit_index The index of the bit to set.
  */
-void set_bit_buffer(byte_t *buffer, byte_t value, size_t bit_index);
+void set_bit(byte_t *buffer, byte_t value, size_t bit_index);
 
 #endif /* BIT_H */

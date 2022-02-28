@@ -5,3 +5,4 @@ beware_overflow/main.c
 block_allocator/main.c
 page_begin/main.c
 tests_suite
+test_main

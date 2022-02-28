@@ -35,7 +35,7 @@ struct slab_meta
     size_t slab_used_len; // Number of used slabs
     byte_t slab_used[]; // Are slabs used? (0 = free, 1 = used)
                         // must be accessed with
-                        // `get_bit_buffer` and `set_bit_buffer`
+                        // `get_bit` and `set_bit`
 };
 
 /**

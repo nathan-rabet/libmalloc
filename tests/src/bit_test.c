@@ -4,41 +4,35 @@
 
 Test(get_bit, null_safety)
 {
-    cr_assert_eq(get_bit_buffer(NULL, 0), 0xFF);
+    cr_assert_eq(get_bit(NULL, 0), 0xFF);
 }
 
-Test(get_bit, get_prev_bit)
-{
-    byte_t buffer[] = { 0x00, 0xFF };
-
-    cr_assert_eq(get_bit_buffer(&buffer[1], -1), 0b0);
-}
-
-Test(get_bit, get_bit_0b0)
+Test(get_bit, get_bit_all_combinations)
 {
     byte_t buffer = 0b0;
 
     for (size_t i = 0; i < 8; i++)
-        cr_assert_eq(get_bit_buffer(buffer, i), 0, "get_bit(0b0, %zu) != 0", i);
+        cr_assert_eq(get_bit(&buffer, i), 0, "get_bit(0b0, %zu) != 0", i);
 }
 
 Test(get_bit, get_bit_0b1)
 {
-    byte_t buffer = 0b1;
+    byte_t buffer = 0b00000001;
 
-    for (size_t i = 1; i < 8; i++)
-        cr_assert_eq(get_bit_buffer(buffer, i), 0, "get_bit(0b1, %zu) != 0", i);
+    for (size_t i = 0; i < 8; i++)
+        cr_assert_eq(get_bit(&buffer, i), i == 7, "get_bit(0b1, %zu) != 0",
+                     i == 7);
 }
 
 Test(get_bit, get_bit_0b101_0)
 {
-    byte_t buffer = 0b101;
+    byte_t buffer = 0b10100000;
 
-    cr_assert_eq(get_bit_buffer(&buffer, 0), 1);
-    cr_assert_eq(get_bit_buffer(&buffer, 1), 0);
-    cr_assert_eq(get_bit_buffer(&buffer, 2), 1);
+    cr_assert_eq(get_bit(&buffer, 0), 1);
+    cr_assert_eq(get_bit(&buffer, 1), 0);
+    cr_assert_eq(get_bit(&buffer, 2), 1);
     for (size_t i = 3; i < 8; i++)
-        cr_assert_eq(get_bit(buffer, i), 0, "get_bit(0b101, %zu) != 0", i);
+        cr_assert_eq(get_bit(&buffer, i), 0, "get_bit(0b101, %zu) != 0", i);
 }
 
 Test(get_bit, get_bit_buffer_0xFF_0b0)
@@ -46,84 +40,72 @@ Test(get_bit, get_bit_buffer_0xFF_0b0)
     byte_t buffer[] = { 0xFF, 0b0 };
 
     for (size_t i = 0; i < 8; i++)
-        cr_assert_eq(get_bit_buffer(buffer, i), 1,
-                     "get_bit_buffer(0xFF, %zu) != 1", i);
+        cr_assert_eq(get_bit(buffer, i), 1, "get_bit(0xFF, %zu) != 1", i);
     for (size_t i = 8; i < 16; i++)
-        cr_assert_eq(get_bit_buffer(buffer, i), 0,
-                     "get_bit_buffer(0xFF, %zu) != 0", i);
+        cr_assert_eq(get_bit(buffer, i), 0, "get_bit(0xFF, %zu) != 0", i);
 }
 
 Test(get_bit, get_bit_buffer_0x00_0b1)
 {
-    byte_t buffer[] = { 0x00, 0b1 };
+    byte_t buffer[] = { 0x00, 0b10000000 };
 
     for (size_t i = 0; i < 8; i++)
-        cr_assert_eq(get_bit_buffer(buffer, i), 0,
-                     "get_bit_buffer(0x00, %zu) != 0", i);
+        cr_assert_eq(get_bit(buffer, i), 0, "get_bit(0x00, %zu) != 0", i);
     for (size_t i = 8; i < 16; i++)
-        cr_assert_eq(get_bit_buffer(buffer, i), 1,
-                     "get_bit_buffer(0x00, %zu) != 1", i);
+        cr_assert_eq(get_bit(buffer, i), i == 8, "get_bit(0x00, %zu) != 1",
+                     i == 8);
 }
 
 Test(get_bit, get_bit_BIG_buffer)
 {
     byte_t buffer[] = { 0b00010010, 0b00110100, 0b01010110,
                         0b01111000, 0b10011010, 0b10111100,
-                        0b11011110, 0b11110000, 0b1 };
+                        0b11011110, 0b11110000, 0b10000000 };
 
     // First byte
-    cr_assert_eq(get_bit_buffer(buffer, 0), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 1), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 2), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 3), 1);
-    cr_assert_eq(get_bit_buffer(buffer, 4), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 5), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 6), 1);
-    cr_assert_eq(get_bit_buffer(buffer, 7), 0);
+    cr_assert_eq(get_bit(buffer, 0), 0);
+    cr_assert_eq(get_bit(buffer, 1), 0);
+    cr_assert_eq(get_bit(buffer, 2), 0);
+    cr_assert_eq(get_bit(buffer, 3), 1);
+    cr_assert_eq(get_bit(buffer, 4), 0);
+    cr_assert_eq(get_bit(buffer, 5), 0);
+    cr_assert_eq(get_bit(buffer, 6), 1);
+    cr_assert_eq(get_bit(buffer, 7), 0);
 
     // Second byte
-    cr_assert_eq(get_bit_buffer(buffer, 8), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 9), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 10), 1);
-    cr_assert_eq(get_bit_buffer(buffer, 11), 1);
-    cr_assert_eq(get_bit_buffer(buffer, 12), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 13), 1);
-    cr_assert_eq(get_bit_buffer(buffer, 14), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 15), 0);
+    cr_assert_eq(get_bit(buffer, 8), 0);
+    cr_assert_eq(get_bit(buffer, 9), 0);
+    cr_assert_eq(get_bit(buffer, 10), 1);
+    cr_assert_eq(get_bit(buffer, 11), 1);
+    cr_assert_eq(get_bit(buffer, 12), 0);
+    cr_assert_eq(get_bit(buffer, 13), 1);
+    cr_assert_eq(get_bit(buffer, 14), 0);
+    cr_assert_eq(get_bit(buffer, 15), 0);
 
     // ...
 
     // Last byte
-    cr_assert_eq(get_bit_buffer(buffer, 64), 1);
-    cr_assert_eq(get_bit_buffer(buffer, 65), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 66), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 67), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 68), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 69), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 70), 0);
-    cr_assert_eq(get_bit_buffer(buffer, 71), 0);
+    cr_assert_eq(get_bit(buffer, 64), 1);
+    cr_assert_eq(get_bit(buffer, 65), 0);
+    cr_assert_eq(get_bit(buffer, 66), 0);
+    cr_assert_eq(get_bit(buffer, 67), 0);
+    cr_assert_eq(get_bit(buffer, 68), 0);
+    cr_assert_eq(get_bit(buffer, 69), 0);
+    cr_assert_eq(get_bit(buffer, 70), 0);
+    cr_assert_eq(get_bit(buffer, 71), 0);
 }
 
 Test(set_bit, null_safety)
 {
     // Must not crash
-    set_bit_buffer(NULL, 0, 0);
-}
-
-Test(get_bit, set_prev_bit)
-{
-    byte_t buffer[] = { 0x00, 0xFF };
-
-    set_bit_buffer(&buffer[1], 1, -1);
-    cr_assert_eq(buffer[0], 0x1);
-    cr_assert_eq(buffer[1], 0xFF);
+    set_bit(NULL, 0, 0);
 }
 
 Test(get_bit, set_invalid_value)
 {
     byte_t buffer = 0b0;
 
-    set_bit_buffer(&buffer, 666, 1);
+    set_bit(&buffer, 69, 1);
 
     cr_assert_eq(buffer, 0b0);
 }
@@ -133,15 +115,15 @@ Test(set_bit, set_0b0_first)
     byte_t buffer = 0b0;
 
     set_bit(&buffer, 1, 0);
-    cr_assert_eq(buffer, 0b10000000, "set_bit(0b0, 0) != 0b1");
+    cr_assert_eq(buffer, 0b10000000, "set_bit(0b0, 1, 0) != 0b10000000");
 }
 
 Test(set_bit, unset_0b0_first)
 {
     byte_t buffer = 0xFF;
 
-    set_bit(&buffer, 0, 1);
-    cr_assert_eq(buffer, 0b01111111, "set_bit(0b0, 0) != 0b1");
+    set_bit(&buffer, 0, 0);
+    cr_assert_eq(buffer, 0b01111111, "set_bit(0xFF, 0, 1) != 0b01111111");
 }
 
 Test(set_bit, set_0b0_second)
@@ -149,15 +131,16 @@ Test(set_bit, set_0b0_second)
     byte_t buffer = 0b0;
 
     set_bit(&buffer, 1, 1);
-    cr_assert_eq(buffer, 0b01000000, "set_bit(0b0, 1) != 0b10");
+    cr_assert_eq(buffer, 0b01000000, "set_bit(0b0, 1, 1) != 0b01000000");
 }
 
 Test(set_bit, unset_0b0_second)
 {
     byte_t buffer = 0xFF;
 
-    set_bit(&buffer, 0, 0);
-    cr_assert_eq(buffer, 0b10111111, "set_bit(0b0, 1) != 0b10");
+    set_bit(&buffer, 0, 1);
+    cr_assert_eq(buffer, 0b10111111,
+                 "set_bit(0xFF, 0, 1) != 0b10111111, but 0b%x", buffer);
 }
 
 Test(set_bit, set_0b0_third)
@@ -165,15 +148,19 @@ Test(set_bit, set_0b0_third)
     byte_t buffer = 0b0;
 
     set_bit(&buffer, 1, 2);
-    cr_assert_eq(buffer, 0b00100000, "set_bit(0b0, 2) != 0b100");
+    cr_assert_eq(buffer, 0b00100000,
+                 "set_bit(0b0, 1, 2) != 0b00100000, but "
+                 "0x%08X",
+                 buffer);
 }
 
 Test(set_bit, unset_0b0_third)
 {
     byte_t buffer = 0xFF;
 
-    set_bit(&buffer, 0, 3);
-    cr_assert_eq(buffer, 0b11011111, "set_bit(0b0, 2) != 0b100");
+    set_bit(&buffer, 0, 2);
+    cr_assert_eq(buffer, 0b11011111,
+                 "set_bit(0xFF, 0, 2) != 0b11011111, but 0x%X", buffer);
 }
 
 Test(set_bit, set_0b0_last)
@@ -181,7 +168,10 @@ Test(set_bit, set_0b0_last)
     byte_t buffer = 0b0;
 
     set_bit(&buffer, 1, 7);
-    cr_assert_eq(buffer, 0b00000001, "set_bit(0b0, 7) != 0b10000000");
+    cr_assert_eq(buffer, 0b00000001,
+                 "set_bit(0b0, 1, 7) != 0b00000001, "
+                 "but 0x%X",
+                 buffer);
 }
 
 Test(set_bit, unset_0b0_last)
@@ -189,36 +179,33 @@ Test(set_bit, unset_0b0_last)
     byte_t buffer = 0xFF;
 
     set_bit(&buffer, 0, 7);
-    cr_assert_eq(buffer, 0b11111110, "set_bit(0b0, 7) != 0b10000000");
+    cr_assert_eq(buffer, 0b11111110, "set_bit(0b0, 0, 7) != 0b10000000");
 }
 
 Test(set_bit, set_buffer_0xFF_first)
 {
-    byte_t buffer[] = { 0xFF, 0b0 };
+    byte_t buffer[] = { 0b11111111, 0b0 };
 
-    set_bit_buffer(buffer, 1, 0);
-    cr_assert_eq(buffer[0], 0xFE, "set_bit_buffer(0xFF, 0) != 0xFE");
-    cr_assert_eq(buffer[1], 0b0, "set_bit_buffer(0xFF, 0) != 0b0");
+    set_bit(buffer, 0, 0);
+    cr_assert_eq(buffer[0], 0b01111111, "set_bit(0xFF, 0) != 0xFE");
+    cr_assert_eq(buffer[1], 0b0, "set_bit(0xFF, 0) != 0b0");
 }
 
 // Macro test mdr
-Test(bit_macro, bits_to_byte_conversion)
+Test(bit_macro, bytes_to_bits_conversion)
 {
-    cr_assert_eq(GET_BITS_SIZE(0b0), 1, "GET_BITS_SIZE(0b0) != 1");
-    cr_assert_eq(GET_BITS_SIZE(0b1), 1, "GET_BITS_SIZE(0b1) != 1");
-    cr_assert_eq(GET_BITS_SIZE(0b10), 2, "GET_BITS_SIZE(0b10) != 2");
-    cr_assert_eq(GET_BITS_SIZE(0b11), 2, "GET_BITS_SIZE(0b11) != 2");
-    cr_assert_eq(GET_BITS_SIZE(0b100), 3, "GET_BITS_SIZE(0b100) != 3");
-    cr_assert_eq(GET_BITS_SIZE(0b101), 3, "GET_BITS_SIZE(0b101) != 3");
-    cr_assert_eq(GET_BITS_SIZE(0b110), 3, "GET_BITS_SIZE(0b110) != 3");
-    cr_assert_eq(GET_BITS_SIZE(0b111), 3, "GET_BITS_SIZE(0b111) != 3");
-    cr_assert_eq(GET_BITS_SIZE(0b1000), 4, "GET_BITS_SIZE(0b1000) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1001), 4, "GET_BITS_SIZE(0b1001) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1010), 4, "GET_BITS_SIZE(0b1010) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1011), 4, "GET_BITS_SIZE(0b1011) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1100), 4, "GET_BITS_SIZE(0b1100) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1101), 4, "GET_BITS_SIZE(0b1101) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1110), 4, "GET_BITS_SIZE(0b1110) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b1111), 4, "GET_BITS_SIZE(0b1111) != 4");
-    cr_assert_eq(GET_BITS_SIZE(0b10000), 5, "GET_BITS_SIZE(0b10000) != 5");
+    cr_assert_eq(BYTES_TO_BITS(0), 0, "BYTES_TO_BITS(1) != 0");
+    cr_assert_eq(BYTES_TO_BITS(1), 8, "BYTES_TO_BITS(1) != 8");
+    cr_assert_eq(BYTES_TO_BITS(2), 16, "BYTES_TO_BITS(2) != 16");
+    cr_assert_eq(BYTES_TO_BITS(3), 24, "BYTES_TO_BITS(3) != 24");
+    cr_assert_eq(BYTES_TO_BITS(4), 32, "BYTES_TO_BITS(4) != 32");
+}
+
+Test(bit_macro, bits_to_bytes_conversion)
+{
+    cr_assert_eq(BITS_TO_BYTES(0), 0, "BITS_TO_BYTES(0) != 0");
+    cr_assert_eq(BITS_TO_BYTES(8), 1, "BITS_TO_BYTES(8) != 1");
+    cr_assert_eq(BITS_TO_BYTES(16), 2, "BITS_TO_BYTES(16) != 2");
+    cr_assert_eq(BITS_TO_BYTES(24), 3, "BITS_TO_BYTES(24) != 3");
+    cr_assert_eq(BITS_TO_BYTES(32), 4, "BITS_TO_BYTES(32) != 4");
 }
