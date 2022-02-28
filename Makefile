@@ -7,7 +7,7 @@ TARGET_LIB = libmalloc.so
 SRC = $(shell find src/core -name '*.c')
 OBJS = $(SRC:.c=.o)
 
-SRC_TESTS = $(shell find tests/src -name '*.c')
+SRC_TESTS = $(shell find tests/core/unit_testing -name '*.c')
 OBJ_TESTS = $(SRC_TESTS:.c=.o)
 
 all: library
