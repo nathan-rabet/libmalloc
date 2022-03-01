@@ -6,8 +6,9 @@
 
 #include "bit.h"
 #include "cache.h"
+#include "page.h"
 
-#    define CANARY_MAGIC 0xFCC01C01 // sounds like "FC coin coin"
+#define CANARY_MAGIC 0xFCC01C01 // sounds like "FC coin coin"
 
 /**
  * @brief A slab_group is a collection of slabs with the same size.
@@ -26,6 +27,12 @@ struct slab_group
  * @brief A slab_meta gives information about a set of slabs.
  *
  */
+
+#define MAX_META_SLAB_USED 8
+
+#define SLAB_HEADER_META_SIZE sizeof(struct slab_meta)
+//     (sizeof(struct slab_group *) + sizeof(struct slab_meta *) * 2              \
+//      + sizeof(struct slab_data *) + sizeof(size_t) * 2)
 struct slab_meta
 {
     struct slab_group
@@ -33,11 +40,10 @@ struct slab_meta
     struct slab_meta *prev; // Previous slab meta
     struct slab_meta *next; // Next slab meta
     struct slab_data *slabs_data; // Slabs data
-    size_t used_count; // Number of used slabs
-    size_t slab_used_len; // Number of used slabs
-    byte_t slab_used[]; // Are slabs used? (0 = free, 1 = used)
-                        // must be accessed with
-                        // `get_bit` and `set_bit`
+    size_t nb_used_slabs; // Number of non-free slabs
+    size_t slab_used_len; // Number of maximum handled slabs in the slab meta
+                          // must be <= MAX_META_SLAB_USED
+    bool slab_used[MAX_META_SLAB_USED]; // Are slabs used?
 };
 
 /**
@@ -46,6 +52,8 @@ struct slab_meta
  * All the allocation functions will return the address of a data[].
  * (and not the address of slab_data)
  */
+
+#define SLAB_HEADER_DATA_SIZE (sizeof(byte_t) + sizeof(uint64_t))
 struct slab_data
 {
     byte_t *meta_used; // Meta slab of the current slab_data
@@ -90,29 +98,31 @@ struct slab_group *slab_group_delete(struct slab_group *slab_group);
 void slab_group_destroy_all(struct slab_group *slab_group);
 
 /**
+ * @brief Get the total length of the slabs (header + data)
+ * maintained by a slab meta.
+ *
+ * @param slabs_meta The slab meta to get the total length of.
+ * @return size_t
+ */
+size_t get_meta_size(struct slab_meta *slabs_meta);
+
+/**
  * @brief Allocate (sorted) a slab meta page.
  *
  * @param linked_slab_meta The actual linked list of slab meta.
- * @return struct slab_meta* The new slab meta head, or NULL in case of error.
+ * @return struct slab_meta* The new slab meta head, or NULL in case of
+ * error.
  */
 struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta);
 
 /**
- * @brief Destroy a slab meta page.
+ * @brief Delete a slab meta page.
  *
  * @param slab_meta The slab meta to destroy.
- * @return struct slab_meta* The new slab meta head, or NULL in case of error.
+ * @return struct slab_meta* The new slab meta head, or NULL in case of
+ * error.
  */
-struct slab_meta *slab_meta_destroy(struct slab_meta *slab_meta);
-
-/**
- * @brief Use a free space in a slab meta.
- *
- * @param slab_meta The slab meta to use.
- * @return struct slab_data* The address of the user-space struct slab_data *,
- * or NULL in case of error.
- */
-struct slab_data *slab_meta_use_one(struct slab_meta *slab_meta);
+struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta);
 
 /**
  * @brief Free a slab in a slab meta.
@@ -122,6 +132,15 @@ struct slab_data *slab_meta_use_one(struct slab_meta *slab_meta);
  * @return true If the slab was freed, false otherwise.
  */
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index);
+
+/**
+ * @brief Use a free space in a slab meta.
+ *
+ * @param slab_meta The slab meta to use.
+ * @return struct slab_data* The address of the user-space struct slab_data
+ * or NULL in case of error.
+ */
+struct slab_data *slab_meta_use_one(struct slab_meta *slab_meta);
 
 /**
  * @brief Initialize a slab header data (canary, slab_meta).
@@ -154,4 +173,12 @@ bool coin_coin(struct slab_data *slab_data);
  * @return struct slab_data* The slab data header.
  */
 struct slab_data *get_slab_data_header(byte_t *user_data);
+
+/**
+ * @brief Reserve a free slab and initialize its header.
+ *
+ * @param slab_meta The slab meta to use.
+ * @return size_t The index of the reserved slab in the slab meta.
+ */
+size_t slab_meta_allocate(struct slab_meta *slab_meta);
 #endif /* SLAB_GROUP_H */
