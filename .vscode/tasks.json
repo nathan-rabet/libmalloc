@@ -17,6 +17,7 @@
             "command": "/usr/bin/make",
             "args": [
                 "test_main",
+                "-Bj",
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

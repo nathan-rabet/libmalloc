@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "criterion.h": "c",
+        "slab.h": "c",
+        "stdbool.h": "c",
+        "math.h": "c",
+        "maths.h": "c"
+    }
+}

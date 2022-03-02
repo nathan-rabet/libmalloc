@@ -1,6 +1,6 @@
 CC = gcc
 CPPFLAGS = -D_DEFAULT_SOURCE
-CFLAGS = -Wall -Wextra -Werror -std=c99 -Iinclude
+CFLAGS = -Wall -Wextra -Werror -std=c99  -pedantic -Iinclude 
 LDFLAGS = 
 
 TARGET_LIB = libmalloc.so
@@ -24,10 +24,12 @@ debug: clean $(TARGET_LIB)
 check: tests
 	./tests_suite
 
+tests: CFLAGS += -g
 tests: $(OBJS) $(OBJ_TESTS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -lcriterion -o tests_suite $^
+	$(CC) $(CPPFLAGS) $(CFLAGS) -lcriterion -lm -o tests_suite $^
 
 test_main: CFLAGS += -g
+test_main: LDFLAGS += -lm
 test_main: $(OBJS) tests/test_main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o test_main $^
 

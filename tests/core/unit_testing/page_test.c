@@ -31,9 +31,9 @@ Test(page, begin_page)
     void *page_size = (void *)PAGE_SIZE();
 
     cr_assert_eq((void *)page_begin(NULL), NULL);
-    cr_assert_eq((void *)page_begin(page_size - 1), (void *)0);
+    cr_assert_eq((void *)page_begin((char *)page_size - 1), (void *)0);
     cr_assert_eq((void *)page_begin(page_size), (void *)page_size);
-    cr_assert_eq((void *)page_begin(page_size + 1), (void *)page_size);
+    cr_assert_eq((void *)page_begin((char *)page_size + 1), (void *)page_size);
     cr_assert_eq((void *)page_begin((void *)(2 * (long)page_size - 1)),
                  (void *)page_size);
     cr_assert_eq((void *)page_begin((void *)(2 * (long)page_size)),

@@ -1,20 +1,23 @@
 #include <sys/mman.h>
 
+#include "maths.h"
 #include "slab.h"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-// TODO : Code review
 size_t get_meta_size(struct slab_meta *slabs_meta)
 {
     return slabs_meta->slab_used_len
         * (SLAB_HEADER_DATA_SIZE
-           + get_group_size(slabs_meta->common_group->size_multiplicity));
+           + power2(slabs_meta->common_group->size_multiplicity));
 }
 
-// TODO : Code review
-struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta)
+struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
+                                   struct slab_group *common_group)
 {
+    if (!common_group)
+        return NULL;
+
     struct slab_meta *new_slab_meta =
         mmap(NULL, SLAB_HEADER_META_SIZE, PROT_READ | PROT_WRITE,
              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -25,15 +28,23 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta)
     // (better for allocations, not for desallocations)
     new_slab_meta->next = linked_slab_meta;
     new_slab_meta->prev = NULL;
-
-    size_t slab_size =
-        (SLAB_HEADER_DATA_SIZE
-         + get_group_size(new_slab_meta->common_group->size_multiplicity));
+    new_slab_meta->common_group = common_group;
+    if (linked_slab_meta)
+        linked_slab_meta->prev = new_slab_meta;
 
     // Implies large values for small slabs (optimization)
-    new_slab_meta->slab_used_len =
-        MAX(1, MAX_META_SLAB_USED / (__builtin_clzl(slab_size) + 1));
-    slab_size *= new_slab_meta->slab_used_len;
+    new_slab_meta->slab_used_len = MAX_META_SLAB_USED;
+    size_t slab_size = get_meta_size(new_slab_meta);
+
+    if (slab_size > LOGARITHMIC_DECREASE_BYTES_THRESHOLD)
+    {
+        int slab_size_log = __builtin_ctzl(LOGARITHMIC_DECREASE_BYTES_THRESHOLD)
+            - __builtin_ctzl(slab_size);
+        if (MAX_META_SLAB_USED - slab_size_log > 1)
+            new_slab_meta->slab_used_len = MAX_META_SLAB_USED - slab_size_log;
+        else
+            new_slab_meta->slab_used_len = 1;
+    }
 
     // Allocate the slabs
     new_slab_meta->slabs_data = mmap(NULL, slab_size, PROT_READ | PROT_WRITE,
@@ -90,5 +101,6 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
 size_t slab_meta_allocate(struct slab_meta *slab_meta)
 {
     // TODO
+    (void)slab_meta;
     return 0;
 }

@@ -1,15 +1,28 @@
 #include <criterion/criterion.h>
 
+#include "maths.h"
 #include "slab.h"
 
-Test(slab_group, get_size)
+Test(slab_group, power_of_2)
 {
-    cr_assert_eq(get_group_size(0), 1);
-    cr_assert_eq(get_group_size(1), 2);
-    cr_assert_eq(get_group_size(2), 4);
-    cr_assert_eq(get_group_size(3), 8);
-    cr_assert_eq(get_group_size(4), 16);
-    cr_assert_eq(get_group_size(5), 32);
+    cr_assert_eq(power2(0), 1);
+    cr_assert_eq(power2(1), 2);
+    cr_assert_eq(power2(2), 4);
+    cr_assert_eq(power2(3), 8);
+    cr_assert_eq(power2(4), 16);
+    cr_assert_eq(power2(5), 32);
+}
+
+Test(slab_group, group_create_check_meta)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+
+    cr_assert_not_null(group);
+    cr_assert_eq(group->size_multiplicity, 0);
+    cr_assert_not_null(group->slabs_meta);
+    cr_assert_eq(power2(group->slabs_meta->common_group->size_multiplicity), 1);
+
+    slab_group_destroy_all(group);
 }
 
 Test(slab_group, group_create_check_zero)
@@ -27,7 +40,6 @@ Test(slab_group, group_create_check_zero)
     }
     cr_assert_eq(group->next, NULL);
     cr_assert_eq(group->prev, NULL);
-    cr_assert_eq(group->slabs_meta, NULL);
 
     slab_group_destroy_all(group);
 }
@@ -108,19 +120,25 @@ Test(slab_group, group_create_duplicate)
     // Increasing order
     cr_assert_eq(parser->size_multiplicity, 0);
     parser = parser->next;
+    cr_assert_not_null(parser);
     cr_assert_eq(parser->size_multiplicity, 1);
     parser = parser->next;
+    cr_assert_not_null(parser);
     cr_assert_eq(parser->size_multiplicity, 2);
     parser = parser->next;
+    cr_assert_not_null(parser);
     cr_assert_eq(parser->size_multiplicity, 3);
     cr_assert_eq(parser->next, NULL);
 
     // Decreasing order
     parser = parser->prev;
+    cr_assert_not_null(parser);
     cr_assert_eq(parser->size_multiplicity, 2);
     parser = parser->prev;
+    cr_assert_not_null(parser);
     cr_assert_eq(parser->size_multiplicity, 1);
     parser = parser->prev;
+    cr_assert_not_null(parser);
     cr_assert_eq(parser->size_multiplicity, 0);
     cr_assert_eq(parser->prev, NULL);
 

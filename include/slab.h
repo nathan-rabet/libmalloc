@@ -9,6 +9,8 @@
 #include "page.h"
 
 #define CANARY_MAGIC 0xFCC01C01 // sounds like "FC coin coin"
+#define MAX_META_SLAB_USED 8
+#define LOGARITHMIC_DECREASE_BYTES_THRESHOLD 2048
 
 /**
  * @brief A slab_group is a collection of slabs with the same size.
@@ -28,10 +30,8 @@ struct slab_group
  *
  */
 
-#define MAX_META_SLAB_USED 8
-
 #define SLAB_HEADER_META_SIZE sizeof(struct slab_meta)
-//     (sizeof(struct slab_group *) + sizeof(struct slab_meta *) * 2              \
+//     (sizeof(struct slab_group *) + sizeof(struct slab_meta *) * 2
 //      + sizeof(struct slab_data *) + sizeof(size_t) * 2)
 struct slab_meta
 {
@@ -39,7 +39,7 @@ struct slab_meta
         *common_group; // Common slab group of the linked slabs meta
     struct slab_meta *prev; // Previous slab meta
     struct slab_meta *next; // Next slab meta
-    struct slab_data *slabs_data; // Slabs data
+    struct slab_data *slabs_data; // Slabs RAW data (header + data)
     size_t nb_used_slabs; // Number of non-free slabs
     size_t slab_used_len; // Number of maximum handled slabs in the slab meta
                           // must be <= MAX_META_SLAB_USED
@@ -62,15 +62,8 @@ struct slab_data
 };
 
 /**
- * @brief Return 2 ^ `size_multiplicity`
- *
- * @param multiplicity The multiplicity to compute.
- * @return size_t The result.
- */
-size_t get_group_size(uint8_t multiplicity);
-
-/**
- * @brief Allocate a slab group of the given size multiplicity.
+ * @brief Allocate a slab group of the given size multiplicity
+ * + allocate a meta slab.
  *
  * @note The linked list of slab groups is sorted by size multiplicity.
  *
@@ -110,11 +103,12 @@ size_t get_meta_size(struct slab_meta *slabs_meta);
  * @brief Allocate (sorted) a slab meta page.
  *
  * @param linked_slab_meta The actual linked list of slab meta.
+ * @param common_group The common slab group of the slab meta.
  * @return struct slab_meta* The new slab meta head, or NULL in case of
  * error.
  */
-struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta);
-
+struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
+                                   struct slab_group *common_group);
 /**
  * @brief Delete a slab meta page.
  *

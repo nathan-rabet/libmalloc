@@ -2,11 +2,6 @@
 
 #include "slab.h"
 
-size_t get_group_size(uint8_t multiplicity)
-{
-    return (1 << multiplicity);
-}
-
 struct slab_group *slab_group_create(uint8_t size_multiplicity,
                                      struct slab_group *linked_slab_group)
 
@@ -18,6 +13,7 @@ struct slab_group *slab_group_create(uint8_t size_multiplicity,
         return NULL;
 
     new_slab_group->size_multiplicity = size_multiplicity;
+    new_slab_group->slabs_meta = slab_meta_create(NULL, new_slab_group);
 
     // Sort the linked list of slab groups by size_multiplicity
     if (linked_slab_group != NULL)
@@ -43,7 +39,11 @@ struct slab_group *slab_group_create(uint8_t size_multiplicity,
                 if (size_multiplicity
                     == current_slab_group->next->size_multiplicity)
                 {
-                    if (munmap(new_slab_group, sizeof(struct slab_group)) == -1)
+                    if (munmap(new_slab_group->slabs_meta,
+                               get_meta_size(new_slab_group->slabs_meta))
+                            == -1
+                        || munmap(new_slab_group, sizeof(struct slab_group))
+                            == -1)
                         return NULL;
                     return linked_slab_group;
                 }
@@ -80,7 +80,9 @@ struct slab_group *slab_group_delete(struct slab_group *slab_group)
     if (next_slab_group != NULL)
         next_slab_group->prev = prev_slab_group;
 
-    if (munmap(slab_group, sizeof(struct slab_group)) == -1)
+    if (munmap(slab_group->slabs_meta, get_meta_size(slab_group->slabs_meta))
+            == -1
+        || munmap(slab_group, sizeof(struct slab_group)) == -1)
         return NULL;
 
     return next_slab_group;

@@ -1,4 +1,4 @@
-#include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,13 +7,15 @@
 
 int main(void)
 {
-    struct slab_group *group = slab_group_create(0, NULL);
-    group = slab_group_create(1, group);
-    group = slab_group_create(2, group);
-    group = slab_group_create(3, group);
+    struct slab_group *slab_group = slab_group_create(
+        floor(log2(128 * LOGARITHMIC_DECREASE_BYTES_THRESHOLD)), NULL);
 
-    // Delete group
-    group->next->next = slab_group_delete(group->next->next);
+    if (slab_group->slabs_meta->slab_used_len != 1)
+    {
+        printf("Slab used len is %ld\n", slab_group->slabs_meta->slab_used_len);
+        exit(EXIT_FAILURE);
+    }
 
+    slab_group_destroy_all(slab_group);
     return 0;
 }
