@@ -67,6 +67,7 @@ struct slab_group *slab_group_create(uint8_t size_multiplicity,
     return new_slab_group;
 }
 
+// ! TO TEST
 struct slab_group *slab_group_delete(struct slab_group *slab_group)
 {
     if (slab_group == NULL)
@@ -75,17 +76,30 @@ struct slab_group *slab_group_delete(struct slab_group *slab_group)
     struct slab_group *next_slab_group = slab_group->next;
     struct slab_group *prev_slab_group = slab_group->prev;
 
+    struct slab_group *returned_slab_group = NULL;
     if (prev_slab_group != NULL)
+    {
+        returned_slab_group = prev_slab_group;
         prev_slab_group->next = next_slab_group;
+    }
     if (next_slab_group != NULL)
+    {
+        returned_slab_group = next_slab_group;
         next_slab_group->prev = prev_slab_group;
+    }
 
-    if (munmap(slab_group->slabs_meta, get_meta_size(slab_group->slabs_meta))
-            == -1
+    if (returned_slab_group)
+        while (returned_slab_group->prev)
+            returned_slab_group = returned_slab_group->prev;
+
+    if ((slab_group->slabs_meta
+         && munmap(slab_group->slabs_meta,
+                   get_meta_size(slab_group->slabs_meta))
+             == -1)
         || munmap(slab_group, sizeof(struct slab_group)) == -1)
         return NULL;
 
-    return next_slab_group;
+    return returned_slab_group;
 }
 
 void slab_group_destroy_all(struct slab_group *slab_group)

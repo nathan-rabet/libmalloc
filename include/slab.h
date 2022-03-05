@@ -127,7 +127,7 @@ size_t get_slab_size(struct slab_meta *slabs_meta);
 size_t get_meta_size(struct slab_meta *slabs_meta);
 
 /**
- * @brief Allocate (sorted) a slab meta page.
+ * @brief Allocate a slab meta page.
  *
  * @param linked_slab_meta The actual linked list of slab meta.
  * @param common_group The common slab group of the slab meta.
@@ -146,13 +146,22 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
 struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta);
 
 /**
+ * @brief Retreive an index of a free slab in a slab meta.
+ *
+ * @param slabs_meta The slab meta to search in.
+ * @return size_t The index of the free slab in the slab_meta.
+ */
+size_t retreive_slab_meta_index(bool *slabs_meta);
+
+/**
  * @brief Reserve an available slab page in the provided slab meta or
  * create a new one if there is no available slab page.
  *
- * @param slab_meta
- * @return size_t
+ * @param slab_meta The slab meta to allocate a slab in.
+ * @return bool* The slab_meta* + index of the slab.
+ * The index can be retrieved with retreive_slab_meta_index().
  */
-size_t slab_meta_allocate(struct slab_meta *slab_meta);
+bool *slab_meta_allocate(struct slab_meta *slab_meta);
 
 /**
  * @brief Free a slab in a slab meta.

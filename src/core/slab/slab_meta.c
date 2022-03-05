@@ -76,21 +76,35 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
     struct slab_meta *next_slab_meta = slab_meta->next;
     struct slab_meta *prev_slab_meta = slab_meta->prev;
 
+    struct slab_meta *returned_slab_meta = NULL;
+
     if (prev_slab_meta != NULL)
+    {
+        returned_slab_meta = prev_slab_meta;
         prev_slab_meta->next = next_slab_meta;
+    }
     if (next_slab_meta != NULL)
+    {
+        returned_slab_meta = next_slab_meta;
         next_slab_meta->prev = prev_slab_meta;
+    }
+
+    if (returned_slab_meta)
+        while (returned_slab_meta->prev)
+            returned_slab_meta = returned_slab_meta->prev;
+
+    // TODO : Delete the slab group if no more meta
 
     // Delete slab_meta & the corresponding slab_data's
     if (munmap(slab_meta->slabs_data, get_meta_size(slab_meta)) == -1
         || munmap(slab_meta, sizeof(struct slab_meta)) == -1)
         return NULL;
 
-    return next_slab_meta;
+    return returned_slab_meta;
 }
 
 // ! TO TEST
-size_t slab_meta_allocate(struct slab_meta *slab_meta)
+bool *slab_meta_allocate(struct slab_meta *slab_meta)
 {
     if (slab_meta)
     {
@@ -98,14 +112,23 @@ size_t slab_meta_allocate(struct slab_meta *slab_meta)
         {
             if (slab_meta->slab_used[i] == false)
             {
+                slab_meta->nb_used_slabs++;
                 slab_meta->slab_used[i] = true;
                 slab_data_init(slab_meta, i);
 
-                return i;
+                void *slab_data_addr = &slab_meta->slabs_data[i];
+
+                return slab_data_addr;
             }
         }
+
+        // In case of a full slab_meta, allocate a new one
+        slab_meta->common_group->slabs_meta =
+            slab_meta_create(slab_meta, slab_meta->common_group);
+
+        return slab_meta_allocate(slab_meta->common_group->slabs_meta);
     }
-    return -1;
+    return NULL;
 }
 
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
@@ -115,7 +138,9 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
         return false;
 
     slab_meta->nb_used_slabs--;
-    if (slab_meta->nb_used_slabs == 0)
+
+    // TODO : Delete the slab group if no more meta
+    if (slab_meta->nb_used_slabs == 0 && (slab_meta->prev || slab_meta->next))
         slab_meta->common_group->slabs_meta = slab_meta_delete(slab_meta);
 
     else

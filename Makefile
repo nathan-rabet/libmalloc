@@ -43,6 +43,8 @@ test_main: $(OBJS) tests/test_main.o
 # 	LD_PRELOAD=$(TARGET_LIB) ./$@
 	
 clean:
-	$(RM) $(TARGET_LIB) $(OBJS_AND_LIB) $(OBJ_TESTS) tests_suite tests/test_main.o
+	$(RM) $(TARGET_LIB) $(OBJS_AND_LIB) $(OBJ_TESTS) \
+	tests_suite tests/test_main.o tests/criterion_debug.o \
+	test_main debug_criterion
 
 .PHONY: all $(TARGET_LIB) clean

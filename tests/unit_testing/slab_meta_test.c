@@ -87,6 +87,7 @@ Test(slab_meta_create, logarithmic_no_decrease)
     slab_group_destroy_all(slab_group);
 }
 
+// ! FIXME: This test is not working
 Test(slab_meta_create, logarithmic_decreases)
 {
     for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
@@ -104,7 +105,23 @@ Test(slab_meta_create, logarithmic_decreases)
     }
 }
 
-Test(slab_meta_delete, delete_basic)
+Test(slab_meta_delete, delete_nothing)
+{
+    cr_assert_null(slab_meta_delete(NULL));
+}
+
+Test(slab_meta_delete, delete_single)
+{
+    struct slab_group *slab_group = slab_group_create(2, NULL);
+
+    slab_group->slabs_meta = slab_meta_delete(slab_group->slabs_meta);
+
+    cr_assert_null(slab_group->slabs_meta);
+
+    slab_group_destroy_all(slab_group);
+}
+
+Test(slab_meta_delete, delete_first)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
@@ -117,6 +134,46 @@ Test(slab_meta_delete, delete_basic)
     cr_assert_null(slab_group->slabs_meta->prev);
     cr_assert_null(slab_group->slabs_meta->next);
 
+    slab_group_destroy_all(slab_group);
+}
+
+Test(slab_meta_delete, delete_second)
+{
+    struct slab_group *slab_group = slab_group_create(2, NULL);
+
+    slab_group->slabs_meta =
+        slab_meta_create(slab_group->slabs_meta, slab_group);
+
+    struct slab_meta *meta = slab_group->slabs_meta;
+
+    slab_meta_delete(slab_group->slabs_meta->next);
+
+    cr_assert_eq(slab_group->slabs_meta, meta);
+    cr_assert_null(slab_group->slabs_meta->prev);
+    cr_assert_null(slab_group->slabs_meta->next);
+
+    slab_group_destroy_all(slab_group);
+}
+
+Test(slab_meta_delete, delete_middle)
+{
+    struct slab_group *slab_group = slab_group_create(2, NULL);
+
+    struct slab_meta *slab_meta_3 = slab_group->slabs_meta;
+    slab_group->slabs_meta =
+        slab_meta_create(slab_group->slabs_meta, slab_group);
+    struct slab_meta *slab_meta_2 = slab_group->slabs_meta;
+    slab_group->slabs_meta =
+        slab_meta_create(slab_group->slabs_meta, slab_group);
+    struct slab_meta *slab_meta_1 = slab_group->slabs_meta;
+
+    // slab_meta_2 is the middle one
+    slab_group->slabs_meta = slab_meta_delete(slab_meta_2);
+
+    cr_assert_eq(slab_group->slabs_meta, slab_meta_1);
+    cr_assert_eq(slab_group->slabs_meta->next, slab_meta_3);
+    cr_assert_null(slab_group->slabs_meta->prev);
+    cr_assert_null(slab_group->slabs_meta->next->next);
     slab_group_destroy_all(slab_group);
 }
 
@@ -185,10 +242,13 @@ Test(slab_meta_free, free_munmap)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
-    slab_meta_allocate(slab_group->slabs_meta);
+    for (size_t i = 0; i < MAX_META_SLAB_USED + 1; i++)
+    {
+        slab_meta_allocate(slab_group->slabs_meta);
+    }
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, 0), true);
-    cr_assert_null(slab_group->slabs_meta);
+    cr_assert_null(slab_group->slabs_meta->next);
 
     slab_group_destroy_all(slab_group);
 }

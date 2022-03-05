@@ -3,7 +3,7 @@
 #include "maths.h"
 #include "slab.h"
 
-Test(slab_group, power_of_2)
+Test(slab_group_power, power_of_2)
 {
     cr_assert_eq(power2(0), 1);
     cr_assert_eq(power2(1), 2);
@@ -13,7 +13,7 @@ Test(slab_group, power_of_2)
     cr_assert_eq(power2(5), 32);
 }
 
-Test(slab_group, group_create_check_meta)
+Test(slab_group_create, group_create_check_meta)
 {
     struct slab_group *group = slab_group_create(0, NULL);
 
@@ -25,7 +25,7 @@ Test(slab_group, group_create_check_meta)
     slab_group_destroy_all(group);
 }
 
-Test(slab_group, group_create_check_zero)
+Test(slab_group_create, group_create_check_zero)
 {
     struct slab_group *group = slab_group_create(1, NULL);
 
@@ -44,7 +44,7 @@ Test(slab_group, group_create_check_zero)
     slab_group_destroy_all(group);
 }
 
-Test(slab_group, group_create_increasing)
+Test(slab_group_create, group_create_increasing)
 {
     struct slab_group *group = slab_group_create(0, NULL);
     group = slab_group_create(1, group);
@@ -76,7 +76,7 @@ Test(slab_group, group_create_increasing)
     slab_group_destroy_all(group);
 }
 
-Test(slab_group, group_create_deacreasing)
+Test(slab_group_create, group_create_deacreasing)
 {
     struct slab_group *group = slab_group_create(3, NULL);
     group = slab_group_create(2, group);
@@ -107,7 +107,7 @@ Test(slab_group, group_create_deacreasing)
     slab_group_destroy_all(group);
 }
 
-Test(slab_group, group_create_duplicate)
+Test(slab_group_create, group_create_duplicate)
 {
     struct slab_group *group = slab_group_create(0, NULL);
     group = slab_group_create(1, group);
@@ -145,7 +145,7 @@ Test(slab_group, group_create_duplicate)
     slab_group_destroy_all(group);
 }
 
-Test(slab_group, delete_first)
+Test(slab_group_delete, delete_first)
 {
     struct slab_group *group = slab_group_create(0, NULL);
     group = slab_group_create(1, group);
@@ -173,7 +173,7 @@ Test(slab_group, delete_first)
     cr_assert_eq(parser, NULL);
 }
 
-Test(slab_group, delete_middle)
+Test(slab_group_delete, delete_middle)
 {
     struct slab_group *group = slab_group_create(0, NULL);
     group = slab_group_create(1, group);
@@ -181,7 +181,7 @@ Test(slab_group, delete_middle)
     group = slab_group_create(3, group);
 
     // Delete group
-    group->next->next = slab_group_delete(group->next->next);
+    group = slab_group_delete(group->next->next);
 
     struct slab_group *parser = group;
     // Increasing order
@@ -202,14 +202,14 @@ Test(slab_group, delete_middle)
     slab_group_destroy_all(group);
 }
 
-Test(slab_group, delete_last)
+Test(slab_group_delete, delete_last)
 {
     struct slab_group *group = slab_group_create(0, NULL);
     group = slab_group_create(1, group);
     group = slab_group_create(2, group);
     group = slab_group_create(3, group);
 
-    group->next->next->next = slab_group_delete(group->next->next->next);
+    group = slab_group_delete(group->next->next->next);
 
     struct slab_group *parser = group;
 
