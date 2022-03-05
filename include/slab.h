@@ -25,14 +25,14 @@ struct slab_group
     struct slab_meta *slabs_meta; // Bitmap of free slabs
 };
 
+#define SLAB_HEADER_META_SIZE sizeof(struct slab_meta)
+//     (sizeof(struct slab_group *) + sizeof(struct slab_meta *) * 2
+//      + sizeof(struct slab_data *) + sizeof(size_t) * 2)
+
 /**
  * @brief A slab_meta gives information about a set of slabs.
  *
  */
-
-#define SLAB_HEADER_META_SIZE sizeof(struct slab_meta)
-//     (sizeof(struct slab_group *) + sizeof(struct slab_meta *) * 2
-//      + sizeof(struct slab_data *) + sizeof(size_t) * 2)
 struct slab_meta
 {
     struct slab_group
@@ -53,13 +53,18 @@ struct slab_meta
  * (and not the address of slab_data)
  */
 
-#define SLAB_HEADER_DATA_SIZE (sizeof(byte_t) + sizeof(uint64_t))
+#define SLAB_HEADER_DATA_SIZE (sizeof(byte_t *) + 2 * sizeof(uint64_t))
 struct slab_data
 {
-    byte_t *meta_used; // Meta slab of the current slab_data
-    uint64_t canary; // Canary (`my slab_meta addr` + 2 * canary = "coin coin")
-    byte_t data[]; // Slab raw data (user data)
+    uint64_t canary_tail; // Tail canary (to detect foward memory corruption).
+    byte_t *my_meta_with_offset; // Meta slab + index of the slab meta.
+    uint64_t canary_head; // Head canary (to detect backward memory corruption).
+    byte_t data[]; // Slab raw data (user data).
 };
+
+// ----------------------------------------------------------------------------
+// ? Slab group
+// ----------------------------------------------------------------------------
 
 /**
  * @brief Allocate a slab group of the given size multiplicity
@@ -90,12 +95,34 @@ struct slab_group *slab_group_delete(struct slab_group *slab_group);
  */
 void slab_group_destroy_all(struct slab_group *slab_group);
 
+// ----------------------------------------------------------------------------
+// ? Slab meta
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief Get the length of the user-usable field of a slab
+ * (header not included) maintained by a slab meta.
+ *
+ * @param slabs_meta
+ * @return size_t The user-usable length of a single slab.
+ */
+size_t get_slab_raw_size(struct slab_meta *slabs_meta);
+
+/**
+ * @brief Get the length of a slab (header + data)
+ * maintained by a slab meta.
+ *
+ * @param slabs_meta
+ * @return size_t The length of a single slab.
+ */
+size_t get_slab_size(struct slab_meta *slabs_meta);
+
 /**
  * @brief Get the total length of the slabs (header + data)
  * maintained by a slab meta.
  *
  * @param slabs_meta The slab meta to get the total length of.
- * @return size_t
+ * @return size_t The total length of the slabs.
  */
 size_t get_meta_size(struct slab_meta *slabs_meta);
 
@@ -119,6 +146,15 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
 struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta);
 
 /**
+ * @brief Reserve an available slab page in the provided slab meta or
+ * create a new one if there is no available slab page.
+ *
+ * @param slab_meta
+ * @return size_t
+ */
+size_t slab_meta_allocate(struct slab_meta *slab_meta);
+
+/**
  * @brief Free a slab in a slab meta.
  *
  * @param slab_meta The slab meta to free.
@@ -127,22 +163,50 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta);
  */
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index);
 
+// ----------------------------------------------------------------------------
+// ? Slab data
+// ----------------------------------------------------------------------------
+
 /**
- * @brief Use a free space in a slab meta.
+ * @brief Return *slab_meta + HEADER_SIZE + index.
  *
- * @param slab_meta The slab meta to use.
- * @return struct slab_data* The address of the user-space struct slab_data
- * or NULL in case of error.
+ * @param slab_meta The slab meta to get the slab data from.
+ * @param index The index where the slab data is.
+ * @return struct slab_data*
  */
-struct slab_data *slab_meta_use_one(struct slab_meta *slab_meta);
+struct slab_data *slab_data_addr_from_meta(struct slab_meta *slab_meta,
+                                           size_t index);
 
 /**
  * @brief Initialize a slab header data (canary, slab_meta).
  *
  * @param slab_meta The slab meta to initialize.
- * @return struct slab_data*
+ * @param index The index of the slab to initialize.
  */
-struct slab_data *slab_data_init(struct slab_meta *slab_meta);
+void slab_data_init(struct slab_meta *slab_meta, size_t index);
+
+/**
+ * @brief Get the slab data header object
+ *
+ * @param user_data The user data to get the slab data header from.
+ * @param index The index in the slab_meta (returned).
+ * @return struct slab_data* The slab data header.
+ */
+struct slab_data *get_slab_data_header(byte_t *user_data, size_t *index);
+
+/**
+ * @brief Verify a slab header data validity (canary, slab_meta).
+ *
+ * @note A slab_data has 2 canaries, one at the beginning and one at the end
+ * of the slab_meta address.
+ *
+ * The rule is the following:
+ * - canary_head = CANARY_MAGIC + 2 *
+ *
+ * @param slab_data The slab data to verify.
+ * @return true if the slab is valid, false otherwise.
+ */
+bool coin_coin(struct slab_data *slab_data);
 
 /**
  * @brief Free a slab in its corresponding slab meta.
@@ -152,27 +216,4 @@ struct slab_data *slab_data_init(struct slab_meta *slab_meta);
  */
 bool slab_data_free(struct slab_data *slab_data);
 
-/**
- * @brief Verify a slab header data validity (canary, slab_meta).
- *
- * @param slab_data The slab data to verify.
- * @return true if the slab is valid, false otherwise.
- */
-bool coin_coin(struct slab_data *slab_data);
-
-/**
- * @brief Get the slab data header object
- *
- * @param user_data The user data to get the slab data header from.
- * @return struct slab_data* The slab data header.
- */
-struct slab_data *get_slab_data_header(byte_t *user_data);
-
-/**
- * @brief Reserve a free slab and initialize its header.
- *
- * @param slab_meta The slab meta to use.
- * @return size_t The index of the reserved slab in the slab meta.
- */
-size_t slab_meta_allocate(struct slab_meta *slab_meta);
 #endif /* SLAB_GROUP_H */

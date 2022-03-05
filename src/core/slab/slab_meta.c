@@ -3,13 +3,19 @@
 #include "maths.h"
 #include "slab.h"
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+size_t get_slab_raw_size(struct slab_meta *slabs_meta)
+{
+    return power2(slabs_meta->common_group->size_multiplicity);
+}
+
+size_t get_slab_size(struct slab_meta *slabs_meta)
+{
+    return SLAB_HEADER_DATA_SIZE + get_slab_raw_size(slabs_meta);
+}
 
 size_t get_meta_size(struct slab_meta *slabs_meta)
 {
-    return slabs_meta->slab_used_len
-        * (SLAB_HEADER_DATA_SIZE
-           + power2(slabs_meta->common_group->size_multiplicity));
+    return slabs_meta->slab_used_len * get_slab_size(slabs_meta);
 }
 
 struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
@@ -38,8 +44,8 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
 
     if (slab_size > LOGARITHMIC_DECREASE_BYTES_THRESHOLD)
     {
-        int slab_size_log = __builtin_ctzl(LOGARITHMIC_DECREASE_BYTES_THRESHOLD)
-            - __builtin_ctzl(slab_size);
+        int slab_size_log =
+            __builtin_ctzl(2 * slab_size / LOGARITHMIC_DECREASE_BYTES_THRESHOLD);
         if (MAX_META_SLAB_USED - slab_size_log > 1)
             new_slab_meta->slab_used_len = MAX_META_SLAB_USED - slab_size_log;
         else
@@ -52,6 +58,7 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
 
     if (new_slab_meta->slabs_data == NULL)
     {
+        // Free the new slab meta
         if (munmap(new_slab_meta, SLAB_HEADER_META_SIZE) == -1)
             return NULL;
         return NULL;
@@ -60,7 +67,7 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
     return new_slab_meta;
 }
 
-// TODO : Code review
+// ! TO TEST
 struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
 {
     if (slab_meta == NULL)
@@ -82,10 +89,29 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
     return next_slab_meta;
 }
 
-// TODO : Code review
+// ! TO TEST
+size_t slab_meta_allocate(struct slab_meta *slab_meta)
+{
+    if (slab_meta)
+    {
+        for (size_t i = 0; i < slab_meta->slab_used_len; i++)
+        {
+            if (slab_meta->slab_used[i] == false)
+            {
+                slab_meta->slab_used[i] = true;
+                slab_data_init(slab_meta, i);
+
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
 {
-    if (!slab_meta || index >= slab_meta->slab_used_len)
+    if (!slab_meta || index >= slab_meta->slab_used_len
+        || slab_meta->slab_used[index] == false)
         return false;
 
     slab_meta->nb_used_slabs--;
@@ -96,11 +122,4 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
         slab_meta->slab_used[index] = false;
 
     return true;
-}
-
-size_t slab_meta_allocate(struct slab_meta *slab_meta)
-{
-    // TODO
-    (void)slab_meta;
-    return 0;
 }
