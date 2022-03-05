@@ -89,7 +89,6 @@ Test(slab_meta_create, logarithmic_no_decrease)
 
 Test(slab_meta_create, logarithmic_decreases)
 {
-    // ? THREAD UNSAFE FOR HIGH NUMBER `i`
     for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
     {
         struct slab_group *slab_group =
@@ -101,7 +100,6 @@ Test(slab_meta_create, logarithmic_decreases)
         cr_assert_eq(slab_group->slabs_meta->slab_used_len,
                      MAX(1, MAX_META_SLAB_USED - 1 - i), "Slab used len is %ld",
                      slab_group->slabs_meta->slab_used_len);
-
         slab_group_destroy_all(slab_group);
     }
 }
