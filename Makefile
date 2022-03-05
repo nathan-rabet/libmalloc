@@ -19,12 +19,13 @@ $(TARGET_LIB): CFLAGS += -pedantic -fvisibility=hidden -fPIC -fno-builtin
 $(TARGET_LIB): LDFLAGS += -Wl,--no-undefined -shared
 $(TARGET_LIB): $(OBJS_AND_LIB) src/malloc.c src/additional_malloc.c
 	$(CC) $(LDFLAGS) -o $@ $^
-
-debug: CFLAGS += -g
-debug: clean $(TARGET_LIB)
 	
 check: tests
 	./tests_suite
+
+dcheck: $(OBJS) tests/criterion_debug.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -lcriterion -lm -o debug_criterion $^
+	./debug_criterion --debug --verbose
 
 tests: CFLAGS += -g
 tests: $(OBJS) $(OBJ_TESTS)

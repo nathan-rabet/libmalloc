@@ -31,29 +31,13 @@
             "preLaunchTask": "make test_main"
         },
         {
-            "name": "make check",
+            "name": "Debug Criterion",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/tests_suite",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Activer l'impression en mode Pretty pour gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "Définir la version désassemblage sur Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "make test suite"
+            "cwd": "${workspaceFolder}",
+            "miDebuggerServerAddress": "localhost:1234",
+            "program": "${workspaceRoot}/debug_criterion",
+            "MIMode": "gdb"
         }
     ]
 }
