@@ -6,7 +6,7 @@
 
 size_t get_slab_raw_size(struct slab_meta *slabs_meta)
 {
-    return power2(slabs_meta->common_group->size_multiplicity);
+    return power_2(slabs_meta->common_group->size_multiplicity);
 }
 
 size_t get_slab_size(struct slab_meta *slabs_meta)

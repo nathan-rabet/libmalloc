@@ -5,12 +5,12 @@
 
 Test(slab_group_power, power_of_2)
 {
-    cr_assert_eq(power2(0), 1);
-    cr_assert_eq(power2(1), 2);
-    cr_assert_eq(power2(2), 4);
-    cr_assert_eq(power2(3), 8);
-    cr_assert_eq(power2(4), 16);
-    cr_assert_eq(power2(5), 32);
+    cr_assert_eq(power_2(0), 1);
+    cr_assert_eq(power_2(1), 2);
+    cr_assert_eq(power_2(2), 4);
+    cr_assert_eq(power_2(3), 8);
+    cr_assert_eq(power_2(4), 16);
+    cr_assert_eq(power_2(5), 32);
 }
 
 Test(slab_group_create, group_create_check_meta)
@@ -20,7 +20,8 @@ Test(slab_group_create, group_create_check_meta)
     cr_assert_not_null(group);
     cr_assert_eq(group->size_multiplicity, 0);
     cr_assert_not_null(group->slabs_meta);
-    cr_assert_eq(power2(group->slabs_meta->common_group->size_multiplicity), 1);
+    cr_assert_eq(power_2(group->slabs_meta->common_group->size_multiplicity),
+                 1);
 
     slab_group_destroy_all(group);
 }

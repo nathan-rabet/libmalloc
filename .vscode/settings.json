@@ -5,6 +5,7 @@
         "stdbool.h": "c",
         "math.h": "c",
         "maths.h": "c",
-        "cast.h": "c"
+        "cast.h": "c",
+        "stdint.h": "c"
     }
 }

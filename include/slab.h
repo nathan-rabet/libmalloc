@@ -186,8 +186,8 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index);
  * @param index The index where the slab data is.
  * @return struct slab_data*
  */
-struct slab_data *slab_data_addr_from_meta(struct slab_meta *slab_meta,
-                                           size_t index);
+struct slab_data *slab_data_from_meta_index(struct slab_meta *slab_meta,
+                                            size_t index);
 
 /**
  * @brief Initialize a slab header data (canary, slab_meta).

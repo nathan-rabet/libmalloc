@@ -2,7 +2,7 @@
 
 #include "slab.h"
 
-Test(slab_data_addr_from_meta, offset_i)
+Test(slab_data_from_meta_index, offset_i)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
@@ -11,7 +11,7 @@ Test(slab_data_addr_from_meta, offset_i)
     for (size_t i = 0; i < MAX_META_SLAB_USED - 1; i++)
     {
         struct slab_data *addr =
-            slab_data_addr_from_meta(slab_group->slabs_meta, i);
+            slab_data_from_meta_index(slab_group->slabs_meta, i);
         cr_assert_eq(addr,
                      (char *)slab_group->slabs_meta->slabs_data
                          + i * get_slab_size(slab_group->slabs_meta));
@@ -20,15 +20,15 @@ Test(slab_data_addr_from_meta, offset_i)
     slab_group_destroy_all(slab_group);
 }
 
-Test(slab_data_addr_from_meta, offset_end)
+Test(slab_data_from_meta_index, offset_end)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
     slab_group->slabs_meta =
         slab_meta_create(slab_group->slabs_meta, slab_group);
 
-    struct slab_data *addr = slab_data_addr_from_meta(slab_group->slabs_meta,
-                                                      MAX_META_SLAB_USED - 1);
+    struct slab_data *addr = slab_data_from_meta_index(slab_group->slabs_meta,
+                                                       MAX_META_SLAB_USED - 1);
     cr_assert_eq(addr,
                  (char *)slab_group->slabs_meta->slabs_data
                      + get_meta_size(slab_group->slabs_meta)
@@ -37,7 +37,7 @@ Test(slab_data_addr_from_meta, offset_end)
     slab_group_destroy_all(slab_group);
 }
 
-Test(slab_data_addr_from_meta, offset_out_of_range)
+Test(slab_data_from_meta_index, offset_out_of_range)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
@@ -45,15 +45,15 @@ Test(slab_data_addr_from_meta, offset_out_of_range)
         slab_meta_create(slab_group->slabs_meta, slab_group);
 
     struct slab_data *addr =
-        slab_data_addr_from_meta(slab_group->slabs_meta, MAX_META_SLAB_USED);
+        slab_data_from_meta_index(slab_group->slabs_meta, MAX_META_SLAB_USED);
     cr_assert_null(addr);
 
     slab_group_destroy_all(slab_group);
 }
 
-Test(slab_data_addr_from_meta, null_param)
+Test(slab_data_from_meta_index, null_param)
 {
-    struct slab_data *addr = slab_data_addr_from_meta(NULL, 0);
+    struct slab_data *addr = slab_data_from_meta_index(NULL, 0);
     cr_assert_null(addr);
 }
 
@@ -75,7 +75,7 @@ Test(slab_data_init, basic)
         slab_data_init(slab_group->slabs_meta, i);
 
         struct slab_data *slab_data_i =
-            slab_data_addr_from_meta(slab_group->slabs_meta, i);
+            slab_data_from_meta_index(slab_group->slabs_meta, i);
 
         cr_assert_eq(
             slab_data_i->canary_head,
@@ -104,7 +104,7 @@ Test(coin_coin, valid)
         slab_data_init(slab_group->slabs_meta, i);
 
         struct slab_data *slab_data_i =
-            slab_data_addr_from_meta(slab_group->slabs_meta, i);
+            slab_data_from_meta_index(slab_group->slabs_meta, i);
 
         cr_assert_eq(coin_coin(slab_data_i), true);
     }
@@ -122,7 +122,7 @@ Test(coin_coin, not_valid)
     slab_data_init(slab_group->slabs_meta, 0);
 
     struct slab_data *slab_data_i =
-        slab_data_addr_from_meta(slab_group->slabs_meta, 0);
+        slab_data_from_meta_index(slab_group->slabs_meta, 0);
 
     slab_data_i->canary_head = 0xDEADBEEF;
     cr_assert_eq(coin_coin(slab_data_i), false);

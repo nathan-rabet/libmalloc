@@ -1,8 +1,15 @@
 #include <stddef.h>
 
+#include "slab.h"
+
+static struct slab_group *slab_group = NULL;
+
 __attribute__((visibility("default")))
 void *malloc(size_t size)
 {
+    if (!slab_group)
+        slab_group = slab_group_create(, NULL);
+
     (void)size;
     return NULL;
 }
@@ -10,7 +17,12 @@ void *malloc(size_t size)
 __attribute__((visibility("default")))
 void free(void *ptr)
 {
-    (void)ptr;
+    if (ptr)
+    {
+        char *p = cast_ptr(ptr);
+        struct slab_data *slab_data = p - SLAB_HEADER_DATA_SIZE;
+        slab_data_free(slab_data);
+    }
 }
 
 __attribute__((visibility("default")))

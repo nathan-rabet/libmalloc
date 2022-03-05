@@ -1,7 +1,6 @@
 CC = gcc
 CPPFLAGS = -D_DEFAULT_SOURCE
 CFLAGS = -Wall -Wextra -Werror -std=c99  -pedantic -Iinclude 
-LDFLAGS = 
 
 TARGET_LIB = libmalloc.so
 SRC = $(shell find src/core -name '*.c')
@@ -15,26 +14,27 @@ OBJ_TESTS = $(SRC_TESTS:.c=.o)
 all: library
 
 library: $(TARGET_LIB)
-$(TARGET_LIB): CFLAGS += -pedantic -fvisibility=hidden -fPIC -fno-builtin
+$(TARGET_LIB): CFLAGS += -fvisibility=hidden -fPIC -fno-builtin
 $(TARGET_LIB): LDFLAGS += -Wl,--no-undefined -shared
-$(TARGET_LIB): $(OBJS_AND_LIB) src/malloc.c src/additional_malloc.c
+$(TARGET_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^
 	
 check: tests
 	./tests_suite
 
 dcheck: $(OBJS) tests/criterion_debug.o
-	$(CC) $(CPPFLAGS) $(CFLAGS) -lcriterion -lm -o debug_criterion $^
+	$(CC) $(CFLAGS) -lcriterion -lm -o debug_criterion $^
 	./debug_criterion --debug --verbose
 
+tests: LDFLAGS += -lm -lcriterion
 tests: CFLAGS += -g
 tests: $(OBJS) $(OBJ_TESTS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -lcriterion -lm -o tests_suite $^
+	$(CC) $(CFLAGS) -o tests_suite $^ $(LDFLAGS)
 
 test_main: CFLAGS += -g
 test_main: LDFLAGS += -lm
 test_main: $(OBJS) tests/test_main.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o test_main $^
+	$(CC) $(CFLAGS) -o test_main $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
