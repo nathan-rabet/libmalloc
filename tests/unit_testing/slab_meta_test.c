@@ -252,3 +252,19 @@ Test(slab_meta_free, free_munmap)
 
     slab_group_destroy_all(slab_group);
 }
+
+Test(slab_meta_retreive_index, retreive_slab_meta_index_null)
+{
+    cr_assert_eq(slab_meta_retreive_index(NULL), 0);
+}
+
+Test(slab_meta_retreive_index, indexes)
+{
+    struct slab_group *slab_group = slab_group_create(2, NULL);
+
+    for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
+        cr_assert_eq(
+            slab_meta_retreive_index(slab_group->slabs_meta->slab_used + i), i);
+
+    slab_group_destroy_all(slab_group);
+}

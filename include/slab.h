@@ -9,6 +9,9 @@
 #include "page.h"
 
 #define CANARY_MAGIC 0xFCC01C01 // sounds like "FC coin coin"
+#define CANARY_HEAD_FUNCTION(addr) (CANARY_MAGIC + 2 * (addr))
+#define CANARY_TAIL_FUNCTION(addr) (CANARY_MAGIC - 2 * (addr))
+
 #define MAX_META_SLAB_USED 8
 #define LOGARITHMIC_DECREASE_BYTES_THRESHOLD 2048
 
@@ -57,7 +60,7 @@ struct slab_meta
 struct slab_data
 {
     uint64_t canary_tail; // Tail canary (to detect foward memory corruption).
-    byte_t *my_meta_with_offset; // Meta slab + index of the slab meta.
+    bool *my_meta_with_offset; // Meta slab + index of the slab meta.
     uint64_t canary_head; // Head canary (to detect backward memory corruption).
     byte_t data[]; // Slab raw data (user data).
 };
@@ -151,7 +154,7 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta);
  * @param slabs_meta The slab meta to search in.
  * @return size_t The index of the free slab in the slab_meta.
  */
-size_t retreive_slab_meta_index(bool *slabs_meta);
+size_t slab_meta_retreive_index(bool *slabs_meta);
 
 /**
  * @brief Reserve an available slab page in the provided slab meta or
@@ -159,7 +162,7 @@ size_t retreive_slab_meta_index(bool *slabs_meta);
  *
  * @param slab_meta The slab meta to allocate a slab in.
  * @return bool* The slab_meta* + index of the slab.
- * The index can be retrieved with retreive_slab_meta_index().
+ * The index can be retrieved with slab_meta_retreive_index().
  */
 bool *slab_meta_allocate(struct slab_meta *slab_meta);
 
@@ -177,7 +180,7 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index);
 // ----------------------------------------------------------------------------
 
 /**
- * @brief Return *slab_meta + HEADER_SIZE + index.
+ * @brief Return &slabs_data[index] equivalent.
  *
  * @param slab_meta The slab meta to get the slab data from.
  * @param index The index where the slab data is.
@@ -210,7 +213,8 @@ struct slab_data *get_slab_data_header(byte_t *user_data, size_t *index);
  * of the slab_meta address.
  *
  * The rule is the following:
- * - canary_head = CANARY_MAGIC + 2 *
+ * - canary_head = CANARY_MAGIC + 2 * my_meta_with_offset
+ * - canary_tail = CANARY_MAGIC - 2 * my_meta_with_offset
  *
  * @param slab_data The slab data to verify.
  * @return true if the slab is valid, false otherwise.

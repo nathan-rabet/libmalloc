@@ -1,5 +1,6 @@
 #include <sys/mman.h>
 
+#include "cast.h"
 #include "maths.h"
 #include "slab.h"
 
@@ -101,6 +102,15 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
         return NULL;
 
     return returned_slab_meta;
+}
+
+size_t slab_meta_retreive_index(bool *slabs_meta)
+{
+    if (slabs_meta == NULL)
+        return 0;
+    struct slab_meta *slabs_meta_base = page_begin(slabs_meta);
+    return cast_ptr_to_size_t(slabs_meta)
+        - cast_ptr_to_size_t(slabs_meta_base->slab_used);
 }
 
 // ! TO TEST

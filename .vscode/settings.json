@@ -4,6 +4,7 @@
         "slab.h": "c",
         "stdbool.h": "c",
         "math.h": "c",
-        "maths.h": "c"
+        "maths.h": "c",
+        "cast.h": "c"
     }
 }
