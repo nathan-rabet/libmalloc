@@ -121,7 +121,9 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
         ssize_t index_to_allocate = -1;
 
         // Cache usage
-        if (slab_meta->common_group->cache.nb_cached_slabs > 0)
+        if ((index_to_allocate = cache_find_by_virginity(
+                 &slab_meta->common_group->cache, must_be_virgin))
+            != -1)
         {
             meta_to_allocate =
                 slab_meta->common_group->cache.cached_slabs[0].slab_meta;
@@ -165,7 +167,7 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
         return false;
 
     slab_meta->nb_used_slabs--;
-    cache_add_data(&slab_meta->common_group->cache, slab_meta, index);
+    cache_add_data(&slab_meta->common_group->cache, slab_meta, index, false);
 
     // TODO : Delete the slab group if no more meta
     if (slab_meta->nb_used_slabs == 0 && (slab_meta->prev || slab_meta->next))

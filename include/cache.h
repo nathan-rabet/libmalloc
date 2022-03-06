@@ -1,6 +1,7 @@
 #ifndef CACHE_H
 #define CACHE_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -14,6 +15,7 @@ struct slab_cache_data
 {
     struct slab_meta *slab_meta; // Slab meta
     size_t free_bit_index; // Free bit index
+    bool is_dirty; // Is not virgin (calloc friendly)
 };
 
 /**
@@ -34,9 +36,10 @@ struct slab_cache
  * @param cache The cache to add the information to.
  * @param slab_meta The slab meta address to add.
  * @param free_bit_index The free bit index to add.
+ * @param is_dirty Is the slab dirty.
  */
 void cache_add_data(struct slab_cache *cache, struct slab_meta *slab_meta,
-                    uint64_t free_bit_index);
+                    uint64_t free_bit_index, bool is_dirty);
 
 /**
  * @brief Remove a cache entry by its index.
@@ -45,5 +48,14 @@ void cache_add_data(struct slab_cache *cache, struct slab_meta *slab_meta,
  * @param index The index of the cache entry to remove.
  */
 void cache_delete_by_index(struct slab_cache *cache, uint8_t index);
+
+/**
+ * @brief Search a cache entry by its virginity.
+ *
+ * @param cache The cache to search in.
+ * @param is_dirty Is the wished entry dirty or not.
+ * @return int8_t The index of the entry if found, -1 otherwise.
+ */
+int8_t cache_find_by_virginity(struct slab_cache *cache, bool is_dirty);
 
 #endif /* CACHE_H */
