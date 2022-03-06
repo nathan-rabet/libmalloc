@@ -3,12 +3,12 @@ CPPFLAGS = -D_DEFAULT_SOURCE
 CFLAGS = -Wall -Wextra -Werror -std=c99  -pedantic -Iinclude 
 
 TARGET_LIB = libmalloc.so
-SRC = $(shell find src/core -name '*.c')
+SRC = src/core/slab/cache.c src/core/slab/slab_meta.c src/core/slab/slab_group.c src/core/slab/slab_data.c src/core/utils/maths.c src/core/utils/bit.c src/core/utils/cast.c src/core/utils/overflow.c
 OBJS = $(SRC:.c=.o)
-SRC_AND_LIB = $(shell find src -name '*.c')
+SRC_AND_LIB = src/core/slab/cache.c src/core/slab/slab_meta.c src/core/slab/slab_group.c src/core/slab/slab_data.c src/core/utils/maths.c src/core/utils/bit.c src/core/utils/cast.c src/core/utils/overflow.c src/malloc.c src/additional_malloc.c
 OBJS_AND_LIB = $(SRC_AND_LIB:.c=.o)
 
-SRC_TESTS = $(shell find tests/unit_testing -name '*.c')
+SRC_TESTS = tests/unit_testing/bit_test.c tests/unit_testing/overflow_test.c tests/unit_testing/slab_meta_test.c tests/unit_testing/cache_test.c tests/unit_testing/page_test.c tests/unit_testing/slab_data_test.c tests/unit_testing/maths_test.c tests/unit_testing/slab_group_test.c
 OBJ_TESTS = $(SRC_TESTS:.c=.o)
 
 all: library
