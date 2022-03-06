@@ -86,7 +86,7 @@ Test(slab_data_init, basic)
             CANARY_TAIL_FUNCTION((size_t)slab_data_i->my_meta_with_offset));
 
         cr_assert_eq(slab_data_i->my_meta_with_offset,
-                     slab_group->slabs_meta->slab_used + i);
+                     slab_group->slabs_meta->slab_allocated + i);
     }
 
     slab_group_destroy_all(slab_group);

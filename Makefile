@@ -29,7 +29,7 @@ dcheck: $(OBJS) tests/criterion_debug.o
 	$(CC) $(CFLAGS) -lcriterion -lm -o debug_criterion $^
 	./debug_criterion --debug --verbose
 
-tests: LDFLAGS += -lm -lcriterion
+tests: LDFLAGS += -lm -lcriterion -fsanitize=address
 tests: CFLAGS += -g
 tests: $(OBJS) $(OBJ_TESTS)
 	$(CC) $(CFLAGS) -o tests_suite $^ $(LDFLAGS)

@@ -17,11 +17,11 @@ struct slab_data *slab_data_from_meta_index(struct slab_meta *slab_meta,
 
 void slab_data_init(struct slab_meta *slab_meta, size_t index)
 {
-    if (slab_meta && slab_meta->slab_used[index] == false)
+    if (slab_meta && slab_meta->slab_allocated[index] == false)
     {
         struct slab_data *slab_data =
             slab_data_from_meta_index(slab_meta, index);
-        slab_data->my_meta_with_offset = slab_meta->slab_used + index;
+        slab_data->my_meta_with_offset = slab_meta->slab_allocated + index;
 
         slab_data->canary_head = CANARY_HEAD_FUNCTION(
             cast_ptr_to_size_t(slab_data->my_meta_with_offset));

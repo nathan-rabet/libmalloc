@@ -29,9 +29,6 @@ struct slab_group
 };
 
 #define SLAB_HEADER_META_SIZE sizeof(struct slab_meta)
-//     (sizeof(struct slab_group *) + sizeof(struct slab_meta *) * 2
-//      + sizeof(struct slab_data *) + sizeof(size_t) * 2)
-
 /**
  * @brief A slab_meta gives information about a set of slabs.
  *
@@ -46,17 +43,18 @@ struct slab_meta
     size_t nb_used_slabs; // Number of non-free slabs
     size_t slab_used_len; // Number of maximum handled slabs in the slab meta
                           // must be <= MAX_META_SLAB_USED
-    bool slab_used[MAX_META_SLAB_USED]; // Are slabs used?
+    bool slab_allocated[MAX_META_SLAB_USED]; // Are slabs used?
+    bool slab_dirty[MAX_META_SLAB_USED]; // Have slabs allready been written ?
+                                         // Used for calloc()
 };
 
+#define SLAB_HEADER_DATA_SIZE (sizeof(byte_t *) + 2 * sizeof(uint64_t))
 /**
  * @brief A slab_data is where the user data is stored.
  *
  * All the allocation functions will return the address of a data[].
  * (and not the address of slab_data)
  */
-
-#define SLAB_HEADER_DATA_SIZE (sizeof(byte_t *) + 2 * sizeof(uint64_t))
 struct slab_data
 {
     uint64_t canary_tail; // Tail canary (to detect foward memory corruption).
@@ -108,6 +106,17 @@ void slab_group_destroy_all(struct slab_group *slab_group);
  */
 struct slab_group *slab_group_find_enough_space(struct slab_group *slab_group,
                                                 size_t size);
+
+/**
+ * @brief Find a free slab in the given slab group and allocate it.
+ * If no free slab is found, allocate a new slab meta in the slab group.
+ *
+ * @param slab_group The slab group to allocate from.
+ * @param must_be_virgin If true, the slab must be virgin. (calloc frendly)
+ * @return bool* The slab_meta* + index of the slab.
+ * The index can be retrieved with slab_meta_retreive_index().
+ */
+bool *slab_group_allocate(struct slab_group *slab_group, bool must_be_virgin);
 
 // ----------------------------------------------------------------------------
 // ? Slab meta
@@ -172,10 +181,11 @@ size_t slab_meta_retreive_index(bool *slabs_meta);
  * create a new one if there is no available slab page.
  *
  * @param slab_meta The slab meta to allocate a slab in.
+ * @param must_be_virgin If true, the slab must be virgin. (calloc frendly)
  * @return bool* The slab_meta* + index of the slab.
  * The index can be retrieved with slab_meta_retreive_index().
  */
-bool *slab_meta_allocate(struct slab_meta *slab_meta);
+bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin);
 
 /**
  * @brief Free a slab in a slab meta.

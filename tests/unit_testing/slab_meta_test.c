@@ -229,8 +229,8 @@ Test(slab_meta_free, free_no_munmap)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
-    slab_meta_allocate(slab_group->slabs_meta);
-    slab_meta_allocate(slab_group->slabs_meta);
+    slab_meta_allocate(slab_group->slabs_meta, false);
+    slab_meta_allocate(slab_group->slabs_meta, false);
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, 0), true);
     cr_assert_not_null(slab_group->slabs_meta);
@@ -243,9 +243,7 @@ Test(slab_meta_free, free_munmap)
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
     for (size_t i = 0; i < MAX_META_SLAB_USED + 1; i++)
-    {
-        slab_meta_allocate(slab_group->slabs_meta);
-    }
+        slab_meta_allocate(slab_group->slabs_meta, false);
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, 0), true);
     cr_assert_null(slab_group->slabs_meta->next);
@@ -263,8 +261,9 @@ Test(slab_meta_retreive_index, indexes)
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
     for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
-        cr_assert_eq(
-            slab_meta_retreive_index(slab_group->slabs_meta->slab_used + i), i);
+        cr_assert_eq(slab_meta_retreive_index(
+                         slab_group->slabs_meta->slab_allocated + i),
+                     i);
 
     slab_group_destroy_all(slab_group);
 }

@@ -118,3 +118,24 @@ struct slab_group *slab_group_find_enough_space(struct slab_group *slab_group,
 
     return slab_group;
 }
+
+bool *slab_group_allocate(struct slab_group *slab_group, bool must_be_virgin)
+{
+    struct slab_meta *slab_meta = slab_group->slabs_meta;
+
+    bool *allocation = NULL;
+    while (slab_meta && !allocation)
+    {
+        allocation = slab_meta_allocate(slab_meta, must_be_virgin);
+        slab_meta = slab_meta->next;
+    }
+
+    if (allocation)
+        return allocation;
+
+    // In case of a full slab_meta, allocate a new one
+    slab_group->slabs_meta =
+        slab_meta_create(slab_group->slabs_meta, slab_group);
+
+    return slab_meta_allocate(slab_group->slabs_meta, must_be_virgin);
+}

@@ -110,33 +110,27 @@ size_t slab_meta_retreive_index(bool *slabs_meta)
         return 0;
     struct slab_meta *slabs_meta_base = page_begin(slabs_meta);
     return cast_ptr_to_size_t(slabs_meta)
-        - cast_ptr_to_size_t(slabs_meta_base->slab_used);
+        - cast_ptr_to_size_t(slabs_meta_base->slab_allocated);
 }
 
-// ! TO TEST
-bool *slab_meta_allocate(struct slab_meta *slab_meta)
+bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 {
     if (slab_meta)
     {
         for (size_t i = 0; i < slab_meta->slab_used_len; i++)
         {
-            if (slab_meta->slab_used[i] == false)
+            if (slab_meta->slab_allocated[i] == false
+                && IMPLIES(must_be_virgin, slab_meta->slab_dirty[i] == false))
+
             {
                 slab_meta->nb_used_slabs++;
-                slab_meta->slab_used[i] = true;
+                slab_meta->slab_allocated[i] = true;
+                slab_meta->slab_dirty[i] = true;
                 slab_data_init(slab_meta, i);
 
-                void *slab_data_addr = &slab_meta->slabs_data[i];
-
-                return slab_data_addr;
+                return &slab_meta->slab_allocated[i];
             }
         }
-
-        // In case of a full slab_meta, allocate a new one
-        slab_meta->common_group->slabs_meta =
-            slab_meta_create(slab_meta, slab_meta->common_group);
-
-        return slab_meta_allocate(slab_meta->common_group->slabs_meta);
     }
     return NULL;
 }
@@ -144,7 +138,7 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta)
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
 {
     if (!slab_meta || index >= slab_meta->slab_used_len
-        || slab_meta->slab_used[index] == false)
+        || slab_meta->slab_allocated[index] == false)
         return false;
 
     slab_meta->nb_used_slabs--;
@@ -154,7 +148,7 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
         slab_meta->common_group->slabs_meta = slab_meta_delete(slab_meta);
 
     else
-        slab_meta->slab_used[index] = false;
+        slab_meta->slab_allocated[index] = false;
 
     return true;
 }

@@ -6,6 +6,7 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define IMPLIES(a, b) (!(a) || (b))
 
 /**
  * @brief Return 2 ^ n.

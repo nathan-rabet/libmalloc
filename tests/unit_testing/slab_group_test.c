@@ -313,3 +313,105 @@ Test(slab_group_find_enough_space, not_found_2)
 
     slab_group_destroy_all(group);
 }
+
+Test(slab_group_allocate, allocate_basic)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 4);
+
+    bool *ptr = slab_group_allocate(found, false);
+
+    cr_assert_not_null(ptr);
+
+    struct slab_meta *meta = page_begin(ptr);
+    size_t index = slab_meta_retreive_index(ptr);
+
+    cr_assert_eq(meta->slab_allocated[index], true);
+    cr_assert_eq(meta->slab_dirty[index], true);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_allocate, allocate_new_meta)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 4);
+    struct slab_meta *meta_before = found->slabs_meta;
+
+    cr_assert_not_null(found);
+    cr_assert_not_null(found->slabs_meta);
+    cr_assert_not_null(found->slabs_meta->slab_allocated);
+
+    for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
+        found->slabs_meta->slab_allocated[i] = true;
+
+    bool *ptr = slab_group_allocate(found, false);
+
+    cr_assert_not_null(ptr);
+
+    struct slab_meta *meta_after = page_begin(ptr);
+    size_t index = slab_meta_retreive_index(ptr);
+
+    cr_assert_neq(meta_after, meta_before);
+    cr_assert_eq(meta_after->slab_allocated[index], true);
+    cr_assert_eq(meta_after->slab_dirty[index], true);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_allocate, virginity)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 4);
+
+    for (size_t i = 0; i < MAX_META_SLAB_USED - 1; i++)
+        found->slabs_meta->slab_dirty[i] = true;
+
+    bool *ptr = slab_group_allocate(found, true);
+    struct slab_meta *meta = page_begin(ptr);
+    size_t index = slab_meta_retreive_index(ptr);
+
+    cr_assert_eq(index, MAX_META_SLAB_USED - 1);
+    cr_assert_eq(meta->slab_allocated[index], true);
+    cr_assert_eq(meta->slab_dirty[index], true);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_allocate, not_used_and_virgin)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 4);
+
+    for (size_t i = 0; i < MAX_META_SLAB_USED / 2; i++)
+        found->slabs_meta->slab_allocated[i] = true;
+
+    for (size_t i = MAX_META_SLAB_USED / 2; i < MAX_META_SLAB_USED - 1; i++)
+        found->slabs_meta->slab_dirty[i] = true;
+
+    bool *ptr = slab_group_allocate(found, true);
+    struct slab_meta *meta = page_begin(ptr);
+    size_t index = slab_meta_retreive_index(ptr);
+
+    cr_assert_eq(index, MAX_META_SLAB_USED - 1);
+    cr_assert_eq(meta->slab_allocated[index], true);
+    cr_assert_eq(meta->slab_dirty[index], true);
+
+    slab_group_destroy_all(group);
+}
