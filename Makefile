@@ -22,6 +22,9 @@ $(TARGET_LIB): $(OBJS_AND_LIB)
 check: tests
 	./tests_suite
 
+checkv: tests
+	./tests_suite --verbose
+
 dcheck: $(OBJS) tests/criterion_debug.o
 	$(CC) $(CFLAGS) -lcriterion -lm -o debug_criterion $^
 	./debug_criterion --debug --verbose
