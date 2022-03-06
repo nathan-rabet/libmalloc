@@ -208,3 +208,65 @@ Test(cache_find_by_virginity, find_last)
     int8_t index = cache_find_by_virginity(&cache, is_dirty);
     cr_assert_eq(index, 2, "index: %d", index);
 }
+
+Test(cache_find_must_be_virgin, null_params)
+{
+    int8_t index = cache_find_must_be_virgin(NULL, false);
+    cr_assert_eq(index, -1);
+}
+
+Test(cache_find_must_be_virgin, size_0)
+{
+    struct slab_cache cache = { 0 };
+
+    int8_t index = cache_find_must_be_virgin(&cache, true);
+    cr_assert_eq(index, -1);
+}
+
+Test(cache_find_must_be_virgin, gargage_is_enough)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    bool is_dirty = true;
+
+    cache_add_data(&cache, &slab_meta, 0, is_dirty);
+
+    int8_t index = cache_find_must_be_virgin(&cache, false);
+    cr_assert_eq(index, 0);
+}
+
+Test(cache_find_must_be_virgin, gargage_is_enough_got_virgin)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    bool is_dirty = false;
+
+    cache_add_data(&cache, &slab_meta, 0, is_dirty);
+
+    int8_t index = cache_find_must_be_virgin(&cache, false);
+    cr_assert_eq(index, 0);
+}
+
+Test(cache_find_must_be_virgin, chad_want_virgin_and_always_find_one)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    bool is_dirty = false;
+
+    cache_add_data(&cache, &slab_meta, 0, is_dirty);
+
+    int8_t index = cache_find_must_be_virgin(&cache, true);
+    cr_assert_eq(index, 0);
+}
+
+Test(cache_find_must_be_virgin, want_virgin_but_u_are_simp)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    bool is_dirty = true;
+
+    cache_add_data(&cache, &slab_meta, 0, is_dirty);
+
+    int8_t index = cache_find_must_be_virgin(&cache, true);
+    cr_assert_eq(index, -1);
+}

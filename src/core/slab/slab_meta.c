@@ -121,7 +121,7 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
         ssize_t index_to_allocate = -1;
 
         // Cache usage
-        if ((index_to_allocate = cache_find_by_virginity(
+        if ((index_to_allocate = cache_find_must_be_virgin(
                  &slab_meta->common_group->cache, must_be_virgin))
             != -1)
         {

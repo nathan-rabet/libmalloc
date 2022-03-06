@@ -45,3 +45,13 @@ int8_t cache_find_by_virginity(struct slab_cache *cache, bool is_dirty)
 
     return -1;
 }
+
+int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin)
+{
+    for (int8_t i; cache && i < cache->nb_cached_slabs; i++)
+        if (!must_be_virgin
+            || cache->cached_slabs[i].is_dirty == !must_be_virgin)
+            return i;
+
+    return -1;
+}

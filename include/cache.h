@@ -58,4 +58,15 @@ void cache_delete_by_index(struct slab_cache *cache, uint8_t index);
  */
 int8_t cache_find_by_virginity(struct slab_cache *cache, bool is_dirty);
 
+/**
+ * @brief Search a cache entry that must (or not) be virgin.
+ *
+ * This function can return a virgin entry even if `must_be_virgin` is false.
+ *
+ * @param cache The cache to search in.
+ * @param must_be_virgin Is the wished entry virgin or not.
+ * @return int8_t The index of the entry if found, -1 otherwise.
+ */
+int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin);
+
 #endif /* CACHE_H */
