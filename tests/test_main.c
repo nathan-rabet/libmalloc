@@ -8,15 +8,14 @@
 
 int main(void)
 {
-    struct slab_cache cache = { 0 };
-    struct slab_group slab_group = { .size_multiplicity = 42 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
 
-    cache_add_data(&cache, &slab_group, &slab_meta, 1);
-    cache_add_data(&cache, &slab_group, &slab_meta, 2);
-    cache_add_data(&cache, &slab_group, &slab_meta, 3);
+    struct slab_group *found = slab_group_find_enough_space(group, 10);
 
-    cache_delete_by_index(&cache, 2);
+    (void)found;
 
     return 0;
 }

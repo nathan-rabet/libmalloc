@@ -7,6 +7,7 @@
         "maths.h": "c",
         "cast.h": "c",
         "stdint.h": "c",
-        "cache.h": "c"
+        "cache.h": "c",
+        "cmath": "c"
     }
 }

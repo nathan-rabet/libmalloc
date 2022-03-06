@@ -21,6 +21,6 @@ size_t power_2(uint8_t n);
  * @param value The value to compute the logarithm of.
  * @return size_t The computed logarithm.
  */
-size_t log_2(size_t value);
+size_t log2ceil(size_t value);
 
 #endif /* MATHS_H */

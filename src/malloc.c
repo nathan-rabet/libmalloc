@@ -1,5 +1,6 @@
 #include <stddef.h>
 
+#include "maths.h"
 #include "slab.h"
 
 static struct slab_group *slab_group = NULL;
@@ -7,10 +8,12 @@ static struct slab_group *slab_group = NULL;
 __attribute__((visibility("default")))
 void *malloc(size_t size)
 {
-    if (!slab_group)
-        slab_group = slab_group_create(, NULL);
+    if (size > 0)
+    {
+        if (!slab_group)
+            slab_group = slab_group_create(log2ceil(size), NULL);
+    }
 
-    (void)size;
     return NULL;
 }
 

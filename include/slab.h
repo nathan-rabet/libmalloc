@@ -98,6 +98,17 @@ struct slab_group *slab_group_delete(struct slab_group *slab_group);
  */
 void slab_group_destroy_all(struct slab_group *slab_group);
 
+/**
+ * @brief Get the slab group with the multiplicity ceil(log2(size)).
+ *
+ * @param slab_group The head of the linked list of slab groups.
+ * @param size The size of the slab group to get.
+ * @return struct slab_group* The slab group with the multiplicity
+ * ceil(log2(size)), or NULL if the slab group doesn't exists.
+ */
+struct slab_group *slab_group_find_enough_space(struct slab_group *slab_group,
+                                                size_t size);
+
 // ----------------------------------------------------------------------------
 // ? Slab meta
 // ----------------------------------------------------------------------------

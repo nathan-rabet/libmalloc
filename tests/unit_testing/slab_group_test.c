@@ -231,3 +231,85 @@ Test(slab_group_delete, delete_last)
 
     slab_group_destroy_all(group);
 }
+
+Test(slab_group_find_enough_space, find_enough_space_basic)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 4);
+
+    cr_assert_eq(found->size_multiplicity, 2);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_find_enough_space, first)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 1);
+
+    cr_assert_eq(found->size_multiplicity, 0);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_find_enough_space, last)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 8);
+
+    cr_assert_eq(found->size_multiplicity, 3);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_find_enough_space, not_perfect_log)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 5);
+
+    cr_assert_eq(found->size_multiplicity, 3);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_find_enough_space, not_found)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(1, group);
+    group = slab_group_create(2, group);
+    group = slab_group_create(3, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 10);
+
+    cr_assert_null(found);
+
+    slab_group_destroy_all(group);
+}
+
+Test(slab_group_find_enough_space, not_found_2)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+    group = slab_group_create(10, group);
+
+    struct slab_group *found = slab_group_find_enough_space(group, 42);
+
+    cr_assert_null(found);
+
+    slab_group_destroy_all(group);
+}

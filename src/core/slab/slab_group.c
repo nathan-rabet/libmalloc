@@ -1,5 +1,6 @@
 #include <sys/mman.h>
 
+#include "maths.h"
 #include "slab.h"
 
 struct slab_group *slab_group_create(uint8_t size_multiplicity,
@@ -106,4 +107,14 @@ void slab_group_destroy_all(struct slab_group *slab_group)
 {
     while (slab_group != NULL)
         slab_group = slab_group_delete(slab_group);
+}
+
+struct slab_group *slab_group_find_enough_space(struct slab_group *slab_group,
+                                                size_t size)
+{
+    size_t logarithm = log2ceil(size);
+    while (slab_group && slab_group->size_multiplicity != logarithm)
+        slab_group = slab_group->next;
+
+    return slab_group;
 }
