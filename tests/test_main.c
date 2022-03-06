@@ -16,11 +16,17 @@ int main(void)
 
     struct slab_group *found = slab_group_find_enough_space(group, 4);
 
-    for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
+    // Bypass cache
+    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
+        slab_group_allocate(found, true);
+
+    for (size_t i = 0; i < MAX_META_SLAB_USED / 2; i++)
         found->slabs_meta->slab_allocated[i] = true;
 
-    bool *ptr = slab_group_allocate(found, false);
+    for (size_t i = MAX_META_SLAB_USED / 2; i < MAX_META_SLAB_USED - 1; i++)
+        found->slabs_meta->slab_dirty[i] = true;
 
+    bool *ptr = slab_group_allocate(found, true);
     struct slab_meta *meta = page_begin(ptr);
     size_t index = slab_meta_retreive_index(ptr);
 

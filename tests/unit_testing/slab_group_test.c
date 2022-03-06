@@ -32,12 +32,6 @@ Test(slab_group_create, group_create_check_zero)
 
     cr_assert_not_null(group);
     cr_assert_eq(group->size_multiplicity, 1);
-    cr_assert_eq(group->cache.nb_cached_slabs, 0);
-    for (size_t i = 0; i < 3; i++)
-    {
-        cr_assert_eq(group->cache.cached_slabs[i].free_bit_index, 0);
-        cr_assert_eq(group->cache.cached_slabs[i].free_bit_index, 0);
-    }
     cr_assert_eq(group->next, NULL);
     cr_assert_eq(group->prev, NULL);
 
@@ -345,6 +339,10 @@ Test(slab_group_allocate, allocate_new_meta)
     struct slab_group *found = slab_group_find_enough_space(group, 4);
     struct slab_meta *meta_before = found->slabs_meta;
 
+    // Bypass cache
+    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
+        slab_group_allocate(found, true);
+
     cr_assert_not_null(found);
     cr_assert_not_null(found->slabs_meta);
     cr_assert_not_null(found->slabs_meta->slab_allocated);
@@ -375,6 +373,10 @@ Test(slab_group_allocate, virginity)
 
     struct slab_group *found = slab_group_find_enough_space(group, 4);
 
+    // Bypass cache
+    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
+        slab_group_allocate(found, true);
+
     for (size_t i = 0; i < MAX_META_SLAB_USED - 1; i++)
         found->slabs_meta->slab_dirty[i] = true;
 
@@ -398,6 +400,10 @@ Test(slab_group_allocate, not_used_and_virgin)
 
     struct slab_group *found = slab_group_find_enough_space(group, 4);
 
+    // Bypass cache
+    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
+        slab_group_allocate(found, true);
+
     for (size_t i = 0; i < MAX_META_SLAB_USED / 2; i++)
         found->slabs_meta->slab_allocated[i] = true;
 
@@ -408,7 +414,7 @@ Test(slab_group_allocate, not_used_and_virgin)
     struct slab_meta *meta = page_begin(ptr);
     size_t index = slab_meta_retreive_index(ptr);
 
-    cr_assert_eq(index, MAX_META_SLAB_USED - 1);
+    cr_assert_eq(index, MAX_META_SLAB_USED - 1, "index = %zu", index);
     cr_assert_eq(meta->slab_allocated[index], true);
     cr_assert_eq(meta->slab_dirty[index], true);
 

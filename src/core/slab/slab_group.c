@@ -93,6 +93,7 @@ struct slab_group *slab_group_delete(struct slab_group *slab_group)
         while (returned_slab_group->prev)
             returned_slab_group = returned_slab_group->prev;
 
+    // ! FIXME : Inccorect meta deletion
     if ((slab_group->slabs_meta
          && munmap(slab_group->slabs_meta,
                    get_meta_size(slab_group->slabs_meta))

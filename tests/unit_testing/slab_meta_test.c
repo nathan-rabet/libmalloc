@@ -105,6 +105,22 @@ Test(slab_meta_create, logarithmic_decreases, .disabled = true)
     }
 }
 
+Test(slab_meta_create, check_cache)
+{
+    struct slab_group *slab_group = slab_group_create(2, NULL);
+
+    cr_assert_eq(slab_group->cache.nb_cached_slabs, 3);
+    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
+    {
+        cr_assert_eq(slab_group->cache.cached_slabs[i].free_bit_index, i);
+        cr_assert_eq(slab_group->cache.cached_slabs[i].slab_meta,
+                     slab_group->slabs_meta);
+        cr_assert_eq(slab_group->cache.cached_slabs[i].is_dirty, false);
+    }
+
+    slab_group_destroy_all(slab_group);
+}
+
 Test(slab_meta_delete, delete_nothing)
 {
     cr_assert_null(slab_meta_delete(NULL));

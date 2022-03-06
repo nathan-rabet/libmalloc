@@ -65,6 +65,13 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
         return NULL;
     }
 
+    // Add some virgin slabs to the cache
+    // (virgins are allways better than the dirty ones)
+    new_slab_meta->common_group->cache.nb_cached_slabs = 0;
+    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
+        cache_add_data(&new_slab_meta->common_group->cache, new_slab_meta, i,
+                       false);
+
     return new_slab_meta;
 }
 
@@ -125,6 +132,7 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
                  &slab_meta->common_group->cache, must_be_virgin))
             != -1)
         {
+            slab_meta->common_group->cache.nb_cached_slabs--;
             meta_to_allocate =
                 slab_meta->common_group->cache.cached_slabs[0].slab_meta;
             index_to_allocate =
