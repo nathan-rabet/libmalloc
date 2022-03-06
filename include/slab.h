@@ -9,8 +9,8 @@
 #include "page.h"
 
 #define CANARY_MAGIC 0xFCC01C01 // sounds like "FC coin coin"
-#define CANARY_HEAD_FUNCTION(addr) (CANARY_MAGIC + 2 * (addr))
-#define CANARY_TAIL_FUNCTION(addr) (CANARY_MAGIC - 2 * (addr))
+#define CANARY_HEAD_FUNCTION(meta_addr) (CANARY_MAGIC + 2 * (meta_addr))
+#define CANARY_TAIL_FUNCTION(meta_addr) (CANARY_MAGIC - 2 * (meta_addr))
 
 #define MAX_META_SLAB_USED 8
 #define LOGARITHMIC_DECREASE_BYTES_THRESHOLD 2048

@@ -1,7 +1,10 @@
 #ifndef CACHE_H
 #define CACHE_H
 
+#include <stddef.h>
 #include <stdint.h>
+
+#define NB_CACHED_ENTRY 3
 
 /**
  * @brief The data of a slab cache.
@@ -11,7 +14,7 @@ struct slab_cache_data
 {
     struct slab_group *slab_group; // Slab group
     struct slab_meta *slab_meta; // Slab meta
-    uint64_t free_bit_index; // Free bit index
+    size_t free_bit_index; // Free bit index
 };
 
 /**
@@ -23,7 +26,7 @@ struct slab_cache_data
 struct slab_cache
 {
     uint8_t nb_cached_slabs : 2; // Number of cached slabs (0-3)
-    struct slab_cache_data cached_slabs[3]; // Cached slabs (0-3)
+    struct slab_cache_data cached_slabs[NB_CACHED_ENTRY]; // Cached slabs (0-3)
 };
 
 /**
@@ -65,7 +68,7 @@ int8_t cache_find_by_slab_meta(struct slab_cache *cache,
  * @return int8_t The index of the cache entry (-1 if not found).
  */
 int8_t cache_find_by_free_bit_index(struct slab_cache *cache,
-                                    uint64_t free_bit_index);
+                                    size_t free_bit_index);
 
 /**
  * @brief Remove a cache entry by its index.
