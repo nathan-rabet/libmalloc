@@ -178,7 +178,7 @@ size_t slab_meta_retreive_index(bool *slabs_meta);
 
 /**
  * @brief Reserve an available slab page in the provided slab meta or
- * create a new one if there is no available slab page.
+ * return NULL if no slab is available.
  *
  * @param slab_meta The slab meta to allocate a slab in.
  * @param must_be_virgin If true, the slab must be virgin. (calloc frendly)

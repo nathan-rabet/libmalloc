@@ -117,21 +117,44 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 {
     if (slab_meta)
     {
-        for (size_t i = 0; i < slab_meta->slab_used_len; i++)
+        struct slab_meta *meta_to_allocate = NULL;
+        ssize_t index_to_allocate = -1;
+
+        // Cache usage
+        if (slab_meta->common_group->cache.nb_cached_slabs > 0)
         {
-            if (slab_meta->slab_allocated[i] == false
-                && IMPLIES(must_be_virgin, slab_meta->slab_dirty[i] == false))
-
+            meta_to_allocate =
+                slab_meta->common_group->cache.cached_slabs[0].slab_meta;
+            index_to_allocate =
+                slab_meta->common_group->cache.cached_slabs[0].free_bit_index;
+        }
+        else
+        {
+            for (size_t i = 0; i < slab_meta->slab_used_len; i++)
             {
-                slab_meta->nb_used_slabs++;
-                slab_meta->slab_allocated[i] = true;
-                slab_meta->slab_dirty[i] = true;
-                slab_data_init(slab_meta, i);
+                if (slab_meta->slab_allocated[i] == false
+                    && IMPLIES(must_be_virgin,
+                               slab_meta->slab_dirty[i] == false))
 
-                return &slab_meta->slab_allocated[i];
+                {
+                    meta_to_allocate = slab_meta;
+                    index_to_allocate = i;
+                    break;
+                }
             }
         }
+
+        if (meta_to_allocate)
+        {
+            meta_to_allocate->nb_used_slabs++;
+            meta_to_allocate->slab_allocated[index_to_allocate] = true;
+            meta_to_allocate->slab_dirty[index_to_allocate] = true;
+            slab_data_init(meta_to_allocate, index_to_allocate);
+
+            return &meta_to_allocate->slab_allocated[index_to_allocate];
+        }
     }
+
     return NULL;
 }
 
@@ -142,6 +165,7 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
         return false;
 
     slab_meta->nb_used_slabs--;
+    cache_add_data(&slab_meta->common_group->cache, slab_meta, index);
 
     // TODO : Delete the slab group if no more meta
     if (slab_meta->nb_used_slabs == 0 && (slab_meta->prev || slab_meta->next))

@@ -36,7 +36,6 @@ Test(slab_group_create, group_create_check_zero)
     for (size_t i = 0; i < 3; i++)
     {
         cr_assert_eq(group->cache.cached_slabs[i].free_bit_index, 0);
-        cr_assert_eq(group->cache.cached_slabs[i].slab_group, 0);
         cr_assert_eq(group->cache.cached_slabs[i].free_bit_index, 0);
     }
     cr_assert_eq(group->next, NULL);
