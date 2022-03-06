@@ -13,6 +13,12 @@ OBJ_TESTS = $(SRC_TESTS:.c=.o)
 
 all: library
 
+library_debug: CFLAGS += -g -fPIC -fno-builtin
+library_debug: LDFLAGS += -Wl,--no-undefined -shared
+library_debug: $(OBJS_AND_LIB)
+	$(CC) $(LDFLAGS) -o libmallocgdb.so $^
+
+
 library: $(TARGET_LIB)
 $(TARGET_LIB): CFLAGS += -fvisibility=hidden -fPIC -fno-builtin
 $(TARGET_LIB): LDFLAGS += -Wl,--no-undefined -shared

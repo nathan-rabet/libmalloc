@@ -4,7 +4,6 @@
     // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-       
         {
             "name": "test_main",
             "type": "cppdbg",
@@ -35,9 +34,22 @@
             "type": "cppdbg",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "miDebuggerServerAddress": "localhost:1234",
             "program": "${workspaceRoot}/debug_criterion",
             "MIMode": "gdb"
+        },
+        {
+            "name": "LD_PRELOAD on a.out",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceRoot}/tests/functional/a.out",
+            "MIMode": "gdb",
+            "environment": [
+                {
+                    "name": "LD_PRELOAD",
+                    "value": "${workspaceFolder}/libmallocgdb.so"
+                }
+            ],
         }
     ]
 }
