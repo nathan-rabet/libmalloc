@@ -44,7 +44,7 @@
                     "ignoreFailures": false
                 },
             ],
-            "preLaunchTask": "make library_debug"
+            "preLaunchTask": "make functional_tests"
         },
         {
             "name": "LD_PRELOAD workspace program",

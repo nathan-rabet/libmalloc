@@ -47,7 +47,19 @@
             "options": {
                 "cwd": "${workspaceFolder}"
             }
-        }
+        },
+        {
+            "label": "make functional_tests",
+            "type": "shell",
+            "command": "/usr/bin/make",
+            "args": [
+                "functional_tests",
+                "-Bj",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
     ],
 
     "version": "2.0.0"

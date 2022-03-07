@@ -6,6 +6,7 @@
 int main(void)
 {
     // my_malloc benchmarkings
+    malloc_then_free_then_malloc();
     basic1();
     basic2();
 

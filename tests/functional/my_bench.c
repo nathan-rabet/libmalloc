@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void malloc_then_free_then_malloc(void)
+{
+    void *p = malloc(1);
+    free(p);
+    p = malloc(2);
+}
+
 void basic1(void)
 {
     int *p = malloc(12 * sizeof(int));

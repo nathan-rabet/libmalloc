@@ -12,6 +12,7 @@ void bench_malloc_thread_stress(int n);
 void bench_malloc_thread_local(int n);
 
 // my_malloc benchmarkings
+void malloc_then_free_then_malloc(void);
 void basic1(void);
 void basic2(void);
 
