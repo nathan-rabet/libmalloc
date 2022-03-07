@@ -9,29 +9,13 @@
 
 int main(void)
 {
-    struct slab_group *group = slab_group_create(0, NULL);
-    group = slab_group_create(1, group);
-    group = slab_group_create(2, group);
-    group = slab_group_create(3, group);
+    struct slab_group *slab_group = slab_group_create(2, NULL);
 
-    struct slab_group *found = slab_group_find_enough_space(group, 4);
+    for (size_t i = 0; i < MAX_META_SLAB_USED + 1; i++)
+        slab_meta_allocate(slab_group->slabs_meta, false);
 
-    // Bypass cache
-    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
-        slab_group_allocate(found, true);
+    bool isFree = slab_meta_free(slab_group->slabs_meta, 0);
+    (void)isFree;
 
-    for (size_t i = 0; i < MAX_META_SLAB_USED / 2; i++)
-        found->slabs_meta->slab_allocated[i] = true;
-
-    for (size_t i = MAX_META_SLAB_USED / 2; i < MAX_META_SLAB_USED - 1; i++)
-        found->slabs_meta->slab_dirty[i] = true;
-
-    bool *ptr = slab_group_allocate(found, true);
-    struct slab_meta *meta = page_begin(ptr);
-    size_t index = slab_meta_retreive_index(ptr);
-
-    (void)ptr;
-    (void)meta;
-    (void)index;
     return 0;
 }

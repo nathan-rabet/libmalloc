@@ -30,26 +30,62 @@
             "preLaunchTask": "make test_main"
         },
         {
-            "name": "Debug Criterion",
+            "name": "LD_PRELOAD functional_tests",
             "type": "cppdbg",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceRoot}/debug_criterion",
-            "MIMode": "gdb"
+            "program": "${workspaceRoot}/functional_tests",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Wrapper LD_PRELOAD",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc_debug.so'",
+                    "ignoreFailures": false
+                },
+            ],
+            "preLaunchTask": "make library_debug"
         },
         {
-            "name": "LD_PRELOAD on a.out",
+            "name": "LD_PRELOAD workspace program",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceRoot}/${workspaceFolder}",
+            "program": "/usr/bin/${input:programName}",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Wrapper LD_PRELOAD",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc_debug.so'",
+                    "ignoreFailures": false
+                },
+            ],
+            "preLaunchTask": "make library_debug"
+        },
+        {
+            "name": "LD_PRELOAD system program",
             "type": "cppdbg",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceRoot}/tests/functional/a.out",
+            "program": "/usr/bin/${input:programName}",
+            "stopAtEntry": false,
             "MIMode": "gdb",
-            "environment": [
+            "setupCommands": [
                 {
-                    "name": "LD_PRELOAD",
-                    "value": "${workspaceFolder}/libmallocgdb.so"
-                }
+                    "description": "Wrapper LD_PRELOAD",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc.so'",
+                    "ignoreFailures": false
+                },
             ],
+            "preLaunchTask": "make library"
+        },
+    ],
+    "inputs": [
+        {
+            "id": "programName",
+            "type": "promptString",
+            "description": "Enter the name of the program to preload",
         }
-    ]
+    ],
 }

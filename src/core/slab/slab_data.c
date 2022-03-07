@@ -6,7 +6,7 @@
 struct slab_data *slab_data_from_meta_index(struct slab_meta *slab_meta,
                                             size_t index)
 {
-    if (!slab_meta || index >= slab_meta->slab_used_len)
+    if (!slab_meta || index >= slab_meta->max_handled_slabs)
         return NULL;
     char *slabs_data = cast_ptr(slab_meta->slabs_data);
     struct slab_data *slabs_data_addr =
@@ -17,7 +17,7 @@ struct slab_data *slab_data_from_meta_index(struct slab_meta *slab_meta,
 
 void slab_data_init(struct slab_meta *slab_meta, size_t index)
 {
-    if (slab_meta && slab_meta->slab_allocated[index] == false)
+    if (slab_meta)
     {
         struct slab_data *slab_data =
             slab_data_from_meta_index(slab_meta, index);

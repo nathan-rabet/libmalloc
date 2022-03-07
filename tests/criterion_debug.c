@@ -15,9 +15,9 @@ Test(slab_meta_create, logarithmic_decreases)
                                   + i,
                               NULL);
 
-        cr_assert_eq(slab_group->slabs_meta->slab_used_len,
+        cr_assert_eq(slab_group->slabs_meta->max_handled_slabs,
                      MAX(1, MAX_META_SLAB_USED - 1 - i), "Slab used len is %ld",
-                     slab_group->slabs_meta->slab_used_len);
+                     slab_group->slabs_meta->max_handled_slabs);
         slab_group_destroy_all(slab_group);
     }
 }

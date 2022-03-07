@@ -20,7 +20,7 @@ Test(cache_add_data, add_data)
 {
     struct slab_cache cache = { 0 };
 
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .nb_allocated_slabs = 24 };
     uint64_t free_bit_index = 32;
     bool is_dirty = true;
 
@@ -30,7 +30,7 @@ Test(cache_add_data, add_data)
     cr_assert_eq(cache.nb_cached_slabs, 1);
 
     cr_assert_eq(cache.cached_slabs[0].slab_meta, &slab_meta);
-    cr_assert_eq(cache.cached_slabs[0].slab_meta->nb_used_slabs, 24);
+    cr_assert_eq(cache.cached_slabs[0].slab_meta->nb_allocated_slabs, 24);
 
     cr_assert_eq(cache.cached_slabs[0].free_bit_index, free_bit_index);
     cr_assert_eq(cache.cached_slabs[0].free_bit_index, 32);
@@ -42,7 +42,7 @@ Test(cache_add_data, add_data)
     cr_assert_eq(cache.nb_cached_slabs, 2);
 
     cr_assert_eq(cache.cached_slabs[1].slab_meta, &slab_meta);
-    cr_assert_eq(cache.cached_slabs[1].slab_meta->nb_used_slabs, 24);
+    cr_assert_eq(cache.cached_slabs[1].slab_meta->nb_allocated_slabs, 24);
 
     cr_assert_eq(cache.cached_slabs[1].free_bit_index, free_bit_index);
     cr_assert_eq(cache.cached_slabs[1].free_bit_index, 32);
@@ -54,7 +54,7 @@ Test(cache_add_data, add_data)
     cr_assert_eq(cache.nb_cached_slabs, 3);
 
     cr_assert_eq(cache.cached_slabs[2].slab_meta, &slab_meta);
-    cr_assert_eq(cache.cached_slabs[2].slab_meta->nb_used_slabs, 24);
+    cr_assert_eq(cache.cached_slabs[2].slab_meta->nb_allocated_slabs, 24);
 
     cr_assert_eq(cache.cached_slabs[2].free_bit_index, free_bit_index);
     cr_assert_eq(cache.cached_slabs[2].free_bit_index, 32);
@@ -78,7 +78,7 @@ Test(cache_add_data, add_full)
 Test(cache_delete_by_index, delete_single)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
 
     cache_add_data(&cache, &slab_meta, 32, false);
 
@@ -90,7 +90,7 @@ Test(cache_delete_by_index, delete_single)
 Test(cache_delete_by_index, delete_last_second)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -106,7 +106,7 @@ Test(cache_delete_by_index, delete_last_second)
 Test(cache_delete_by_index, delete_last_third)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -123,7 +123,7 @@ Test(cache_delete_by_index, delete_last_third)
 Test(cache_delete_by_index, delete_first_3elt)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -140,7 +140,7 @@ Test(cache_delete_by_index, delete_first_3elt)
 Test(cache_delete_by_index, delete_middle)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 1, is_dirty);
@@ -173,7 +173,7 @@ Test(cache_find_by_virginity, size_0)
 Test(cache_find_by_virginity, find_first)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -185,7 +185,7 @@ Test(cache_find_by_virginity, find_first)
 Test(cache_find_by_virginity, find_second)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, !is_dirty);
@@ -198,7 +198,7 @@ Test(cache_find_by_virginity, find_second)
 Test(cache_find_by_virginity, find_last)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, !is_dirty);
@@ -226,7 +226,7 @@ Test(cache_find_must_be_virgin, size_0)
 Test(cache_find_must_be_virgin, gargage_is_enough)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -238,7 +238,7 @@ Test(cache_find_must_be_virgin, gargage_is_enough)
 Test(cache_find_must_be_virgin, gargage_is_enough_got_virgin)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = false;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -250,7 +250,7 @@ Test(cache_find_must_be_virgin, gargage_is_enough_got_virgin)
 Test(cache_find_must_be_virgin, chad_want_virgin_and_always_find_one)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = false;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
@@ -262,11 +262,69 @@ Test(cache_find_must_be_virgin, chad_want_virgin_and_always_find_one)
 Test(cache_find_must_be_virgin, want_virgin_but_u_are_simp)
 {
     struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta = { .nb_used_slabs = 24 };
+    struct slab_meta slab_meta = { .max_handled_slabs = 24 };
     bool is_dirty = true;
 
     cache_add_data(&cache, &slab_meta, 0, is_dirty);
 
     int8_t index = cache_find_must_be_virgin(&cache, true);
     cr_assert_eq(index, -1);
+}
+
+Test(cache_find_by_slab_meta, null_params)
+{
+    int8_t index = cache_find_by_slab_meta(NULL, NULL);
+    cr_assert_eq(index, -1);
+}
+
+Test(cache_find_by_slab_meta, find_by_null)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+
+    int8_t index = cache_find_by_slab_meta(&cache, NULL);
+    cr_assert_eq(index, -1);
+}
+
+Test(cache_find_by_slab_meta, find_first)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+
+    int8_t index = cache_find_by_slab_meta(&cache, &slab_meta);
+    cr_assert_eq(index, 0);
+}
+
+Test(cache_find_by_slab_meta, find_second)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+    cache.cached_slabs[0].slab_meta = NULL;
+    cache.cached_slabs[0].free_bit_index = 0;
+    cache_add_data(&cache, &slab_meta, 32, false);
+
+    int8_t index = cache_find_by_slab_meta(&cache, &slab_meta);
+    cr_assert_eq(index, 1, "index: %d", index);
+}
+
+Test(cache_find_by_slab_meta, find_last)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+    cache_add_data(&cache, &slab_meta, 32, false);
+    cache.cached_slabs[0].slab_meta = NULL;
+    cache.cached_slabs[1].slab_meta = NULL;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+
+    int8_t index = cache_find_by_slab_meta(&cache, &slab_meta);
+    cr_assert_eq(index, 2, "index: %d", index);
 }

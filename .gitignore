@@ -7,3 +7,4 @@ page_begin/main.c
 tests_suite
 test_main
 debug_criterion
+functional_tests

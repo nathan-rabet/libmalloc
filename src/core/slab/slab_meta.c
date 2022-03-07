@@ -16,7 +16,7 @@ size_t get_slab_size(struct slab_meta *slabs_meta)
 
 size_t get_meta_size(struct slab_meta *slabs_meta)
 {
-    return slabs_meta->slab_used_len * get_slab_size(slabs_meta);
+    return slabs_meta->max_handled_slabs * get_slab_size(slabs_meta);
 }
 
 struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
@@ -40,17 +40,18 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
         linked_slab_meta->prev = new_slab_meta;
 
     // Implies large values for small slabs (optimization)
-    new_slab_meta->slab_used_len = MAX_META_SLAB_USED;
+    new_slab_meta->max_handled_slabs = MAX_META_SLAB_USED;
     size_t slab_size = get_meta_size(new_slab_meta);
 
     if (slab_size > LOGARITHMIC_DECREASE_BYTES_THRESHOLD)
     {
-        int slab_size_log =
-            __builtin_ctzl(2 * slab_size / LOGARITHMIC_DECREASE_BYTES_THRESHOLD);
+        int slab_size_log = __builtin_ctzl(
+            2 * slab_size / LOGARITHMIC_DECREASE_BYTES_THRESHOLD);
         if (MAX_META_SLAB_USED - slab_size_log > 1)
-            new_slab_meta->slab_used_len = MAX_META_SLAB_USED - slab_size_log;
+            new_slab_meta->max_handled_slabs =
+                MAX_META_SLAB_USED - slab_size_log;
         else
-            new_slab_meta->slab_used_len = 1;
+            new_slab_meta->max_handled_slabs = 1;
     }
 
     // Allocate the slabs
@@ -75,7 +76,6 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
     return new_slab_meta;
 }
 
-// ! TO TEST
 struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
 {
     if (slab_meta == NULL)
@@ -103,6 +103,14 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
 
     // TODO : Delete the slab group if no more meta
 
+    // Delete the cache entry containing the slab meta
+    int8_t slab_meta_cache_index =
+        cache_find_by_slab_meta(&slab_meta->common_group->cache, slab_meta);
+
+    if (slab_meta_cache_index != -1)
+        cache_delete_by_index(&slab_meta->common_group->cache,
+                              slab_meta_cache_index);
+
     // Delete slab_meta & the corresponding slab_data's
     if (munmap(slab_meta->slabs_data, get_meta_size(slab_meta)) == -1
         || munmap(slab_meta, sizeof(struct slab_meta)) == -1)
@@ -124,23 +132,35 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 {
     if (slab_meta)
     {
+        if (slab_meta->nb_allocated_slabs == slab_meta->max_handled_slabs)
+        {
+            slab_meta->common_group->slabs_meta = slab_meta_create(
+                slab_meta->common_group->slabs_meta, slab_meta->common_group);
+
+            return slab_meta_allocate(slab_meta->common_group->slabs_meta,
+                                      must_be_virgin);
+        }
+
         struct slab_meta *meta_to_allocate = NULL;
         ssize_t index_to_allocate = -1;
+        int8_t cache_index = -1;
 
         // Cache usage
-        if ((index_to_allocate = cache_find_must_be_virgin(
+        if ((cache_index = cache_find_must_be_virgin(
                  &slab_meta->common_group->cache, must_be_virgin))
             != -1)
         {
-            slab_meta->common_group->cache.nb_cached_slabs--;
             meta_to_allocate =
-                slab_meta->common_group->cache.cached_slabs[0].slab_meta;
+                slab_meta->common_group->cache.cached_slabs[cache_index]
+                    .slab_meta;
             index_to_allocate =
-                slab_meta->common_group->cache.cached_slabs[0].free_bit_index;
+                slab_meta->common_group->cache.cached_slabs[cache_index]
+                    .free_bit_index;
+            cache_delete_by_index(&slab_meta->common_group->cache, cache_index);
         }
         else
         {
-            for (size_t i = 0; i < slab_meta->slab_used_len; i++)
+            for (size_t i = 0; i < slab_meta->max_handled_slabs; i++)
             {
                 if (slab_meta->slab_allocated[i] == false
                     && IMPLIES(must_be_virgin,
@@ -156,7 +176,7 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 
         if (meta_to_allocate)
         {
-            meta_to_allocate->nb_used_slabs++;
+            meta_to_allocate->nb_allocated_slabs++;
             meta_to_allocate->slab_allocated[index_to_allocate] = true;
             meta_to_allocate->slab_dirty[index_to_allocate] = true;
             slab_data_init(meta_to_allocate, index_to_allocate);
@@ -170,19 +190,23 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
 {
-    if (!slab_meta || index >= slab_meta->slab_used_len
+    if (!slab_meta || index >= slab_meta->max_handled_slabs
         || slab_meta->slab_allocated[index] == false)
         return false;
 
-    slab_meta->nb_used_slabs--;
-    cache_add_data(&slab_meta->common_group->cache, slab_meta, index, false);
+    slab_meta->nb_allocated_slabs--;
 
     // TODO : Delete the slab group if no more meta
-    if (slab_meta->nb_used_slabs == 0 && (slab_meta->prev || slab_meta->next))
+    if (slab_meta->nb_allocated_slabs == 0
+        && (slab_meta->prev || slab_meta->next))
         slab_meta->common_group->slabs_meta = slab_meta_delete(slab_meta);
 
     else
+    {
+        cache_add_data(&slab_meta->common_group->cache, slab_meta, index,
+                       false);
         slab_meta->slab_allocated[index] = false;
+    }
 
     return true;
 }

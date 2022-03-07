@@ -40,9 +40,9 @@ struct slab_meta
     struct slab_meta *prev; // Previous slab meta
     struct slab_meta *next; // Next slab meta
     struct slab_data *slabs_data; // Slabs RAW data (header + data)
-    size_t nb_used_slabs; // Number of non-free slabs
-    size_t slab_used_len; // Number of maximum handled slabs in the slab meta
-                          // must be <= MAX_META_SLAB_USED
+    size_t nb_allocated_slabs; // Number of non-free slabs
+    size_t max_handled_slabs; // Number of maximum handled slabs in the slab
+                              // meta must be <= MAX_META_SLAB_USED
     bool slab_allocated[MAX_META_SLAB_USED]; // Are slabs used?
     bool slab_dirty[MAX_META_SLAB_USED]; // Have slabs allready been written ?
                                          // Used for calloc()

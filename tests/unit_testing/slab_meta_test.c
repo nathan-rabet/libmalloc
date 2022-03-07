@@ -54,8 +54,9 @@ Test(slab_meta_create, create_basic)
 
     cr_assert_eq(slab_group->slabs_meta->common_group, slab_group);
     cr_assert_not_null(slab_group->slabs_meta->slabs_data);
-    cr_assert_eq(slab_group->slabs_meta->slab_used_len, MAX_META_SLAB_USED,
-                 "Slab used len is %d", slab_group->slabs_meta->slab_used_len);
+    cr_assert_eq(slab_group->slabs_meta->max_handled_slabs, MAX_META_SLAB_USED,
+                 "Slab used len is %d",
+                 slab_group->slabs_meta->max_handled_slabs);
 
     slab_group_destroy_all(slab_group);
 }
@@ -81,8 +82,9 @@ Test(slab_meta_create, logarithmic_no_decrease)
          - 1),
         NULL);
 
-    cr_assert_eq(slab_group->slabs_meta->slab_used_len, MAX_META_SLAB_USED,
-                 "Slab used len is %ld", slab_group->slabs_meta->slab_used_len);
+    cr_assert_eq(slab_group->slabs_meta->max_handled_slabs, MAX_META_SLAB_USED,
+                 "Slab used len is %ld",
+                 slab_group->slabs_meta->max_handled_slabs);
 
     slab_group_destroy_all(slab_group);
 }
@@ -98,9 +100,9 @@ Test(slab_meta_create, logarithmic_decreases, .disabled = true)
                                   + i,
                               NULL);
 
-        cr_assert_eq(slab_group->slabs_meta->slab_used_len,
+        cr_assert_eq(slab_group->slabs_meta->max_handled_slabs,
                      MAX(1, MAX_META_SLAB_USED - 1 - i), "Slab used len is %ld",
-                     slab_group->slabs_meta->slab_used_len);
+                     slab_group->slabs_meta->max_handled_slabs);
         slab_group_destroy_all(slab_group);
     }
 }
@@ -205,8 +207,9 @@ Test(slab_meta_free, free_wrong_index)
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, MAX_META_SLAB_USED + 1),
                  false);
 
-    cr_assert_eq(slab_group->slabs_meta->slab_used_len, MAX_META_SLAB_USED,
-                 "Slab used len is %ld", slab_group->slabs_meta->slab_used_len);
+    cr_assert_eq(slab_group->slabs_meta->max_handled_slabs, MAX_META_SLAB_USED,
+                 "Slab used len is %ld",
+                 slab_group->slabs_meta->max_handled_slabs);
 
     slab_group_destroy_all(slab_group);
 }
@@ -218,13 +221,14 @@ Test(slab_meta_free, free_wrong_index_2)
         NULL);
 
     slab_data_init(slab_group->slabs_meta,
-                   slab_group->slabs_meta->slab_used_len - 1);
+                   slab_group->slabs_meta->max_handled_slabs - 1);
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, MAX_META_SLAB_USED - 1),
                  false);
 
-    cr_assert_eq(slab_group->slabs_meta->slab_used_len, MAX_META_SLAB_USED - 1,
-                 "Slab used len is %ld", slab_group->slabs_meta->slab_used_len);
+    cr_assert_eq(slab_group->slabs_meta->max_handled_slabs,
+                 MAX_META_SLAB_USED - 1, "Slab used len is %ld",
+                 slab_group->slabs_meta->max_handled_slabs);
 
     slab_group_destroy_all(slab_group);
 }
@@ -235,8 +239,9 @@ Test(slab_meta_free, free_already_free)
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, 0), false);
 
-    cr_assert_eq(slab_group->slabs_meta->slab_used_len, MAX_META_SLAB_USED,
-                 "Slab used len is %ld", slab_group->slabs_meta->slab_used_len);
+    cr_assert_eq(slab_group->slabs_meta->max_handled_slabs, MAX_META_SLAB_USED,
+                 "Slab used len is %ld",
+                 slab_group->slabs_meta->max_handled_slabs);
 
     slab_group_destroy_all(slab_group);
 }
@@ -249,6 +254,7 @@ Test(slab_meta_free, free_no_munmap)
     slab_meta_allocate(slab_group->slabs_meta, false);
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, 0), true);
+    cr_assert_eq(slab_group->slabs_meta->nb_allocated_slabs, 1);
     cr_assert_not_null(slab_group->slabs_meta);
 
     slab_group_destroy_all(slab_group);
@@ -262,6 +268,9 @@ Test(slab_meta_free, free_munmap)
         slab_meta_allocate(slab_group->slabs_meta, false);
 
     cr_assert_eq(slab_meta_free(slab_group->slabs_meta, 0), true);
+    cr_assert_eq(slab_group->slabs_meta->nb_allocated_slabs,
+                 MAX_META_SLAB_USED);
+
     cr_assert_null(slab_group->slabs_meta->next);
 
     slab_group_destroy_all(slab_group);

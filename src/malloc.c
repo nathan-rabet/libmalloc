@@ -71,7 +71,8 @@ __attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
         char *new_alloc = malloc(size);
         if (new_alloc)
         {
-            struct slab_meta *slab_meta = page_begin(slab_data);
+            struct slab_meta *slab_meta =
+                page_begin(slab_data->my_meta_with_offset);
             size_t old_size =
                 power_2(slab_meta->common_group->size_multiplicity);
             size_t copy_size = MIN(old_size, size);

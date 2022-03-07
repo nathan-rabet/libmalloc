@@ -6,6 +6,7 @@
             "command": "/usr/bin/make",
             "args": [
                 "tests",
+                "-Bj"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -23,6 +24,31 @@
                 "cwd": "${workspaceFolder}"
             }
         },
+        {
+            "label": "make library_debug",
+            "type": "shell",
+            "command": "/usr/bin/make",
+            "args": [
+                "library_debug",
+                "-Bj",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "make library",
+            "type": "shell",
+            "command": "/usr/bin/make",
+            "args": [
+                "library",
+                "-Bj",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
     ],
+
     "version": "2.0.0"
 }

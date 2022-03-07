@@ -1,7 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(void)
+void basic1(void)
+{
+    int *p = malloc(12 * sizeof(int));
+
+    for (size_t i = 0; i < 12; i++)
+        p[i] = i;
+
+    free(p);
+}
+
+void basic2()
 {
     int *p = malloc(12 * sizeof(int));
 
@@ -17,6 +27,4 @@ int main(void)
         printf("%d\n", p[i]);
 
     free(p);
-
-    return 0;
 }
