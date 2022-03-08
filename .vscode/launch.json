@@ -69,16 +69,19 @@
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "program": "/usr/bin/${input:programName}",
+            "args": [
+                "${input:arg1Name}"
+            ],
             "stopAtEntry": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
                     "description": "Wrapper LD_PRELOAD",
-                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc.so'",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc_debug.so'",
                     "ignoreFailures": false
                 },
             ],
-            "preLaunchTask": "make library"
+            "preLaunchTask": "make library_debug"
         },
     ],
     "inputs": [
@@ -86,6 +89,11 @@
             "id": "programName",
             "type": "promptString",
             "description": "Enter the name of the program to preload",
+        },
+        {
+            "id": "arg1Name",
+            "type": "promptString",
+            "description": "The first argument",
         }
     ],
 }

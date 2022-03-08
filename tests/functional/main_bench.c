@@ -9,8 +9,9 @@ int main(void)
     malloc_then_free_then_malloc();
     basic1();
     basic2();
+    heap_fucker();
 
-    // libc benchmarkings
+    // glibc benchmarkings
     bench_malloc_sparse(42);
     bench_malloc_bubble(42);
     bench_malloc_tiny1(42);

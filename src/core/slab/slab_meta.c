@@ -126,6 +126,7 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 {
     if (slab_meta)
     {
+        // If the slab meta is full, we need to allocate a new one
         if (slab_meta->nb_allocated_slabs == slab_meta->max_handled_slabs)
         {
             slab_meta->common_group->slabs_meta = slab_meta_create(
@@ -189,7 +190,6 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
         return false;
 
     slab_meta->nb_allocated_slabs--;
-
     // TODO : Delete the slab group if no more meta
     if (slab_meta->nb_allocated_slabs == 0
         && (slab_meta->prev || slab_meta->next))
@@ -197,9 +197,9 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
 
     else
     {
-        cache_add_data(&slab_meta->common_group->cache, slab_meta, index,
-                       false);
         slab_meta->slab_allocated[index] = false;
+        cache_add_data(&slab_meta->common_group->cache, slab_meta, index,
+                       slab_meta->slab_allocated[index]);
     }
 
     return true;

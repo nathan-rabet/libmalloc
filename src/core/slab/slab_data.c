@@ -1,3 +1,4 @@
+#include <err.h>
 #include <stddef.h>
 
 #include "cast.h"
@@ -7,7 +8,10 @@ struct slab_data *slab_data_from_meta_index(struct slab_meta *slab_meta,
                                             size_t index)
 {
     if (!slab_meta || index >= slab_meta->max_handled_slabs)
-        return NULL;
+        err(1,
+            "slab_data_from_meta_index: invalid params, index: %zu but max: "
+            "%zu",
+            index, slab_meta->max_handled_slabs);
     char *slabs_data = cast_ptr(slab_meta->slabs_data);
     struct slab_data *slabs_data_addr =
         cast_ptr(slabs_data + get_slab_size(slab_meta) * index);

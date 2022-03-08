@@ -3,7 +3,7 @@
 void cache_add_data(struct slab_cache *cache, struct slab_meta *slab_meta,
                     uint64_t free_bit_index, bool is_dirty)
 {
-    if (cache && cache->nb_cached_slabs < NB_CACHED_ENTRY && slab_meta)
+    if (cache && slab_meta && cache->nb_cached_slabs < NB_CACHED_ENTRY)
     {
         cache->cached_slabs[cache->nb_cached_slabs].slab_meta = slab_meta;
         cache->cached_slabs[cache->nb_cached_slabs].free_bit_index =

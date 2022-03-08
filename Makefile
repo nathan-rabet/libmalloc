@@ -35,11 +35,11 @@ $(TARGET_LIB): $(OBJS_AND_LIB)
 	
 check: tests functional_tests $(DEBUG_LIB)
 	./tests_suite
-	ASAN_OPTIONS=detect_leaks=0:LD_PRELOAD=$(DEBUG_LIB) ./functional_tests
+	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
 
-checkv: tests
+checkv: tests functional_tests $(DEBUG_LIB)
 	./tests_suite --verbose
-	ASAN_OPTIONS=detect_leaks=0:LD_PRELOAD=$(DEBUG_LIB) ./functional_tests
+	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
 
 functional_tests: LDFLAGS += -lm -lpthread
 functional_tests: CFLAGS = -std=c99 -g

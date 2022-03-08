@@ -323,6 +323,7 @@ Test(slab_group_allocate, allocate_basic)
     struct slab_meta *meta = page_begin(ptr);
     size_t index = slab_meta_retreive_index(ptr);
 
+    cr_assert_eq(index, 0);
     cr_assert_eq(meta->slab_allocated[index], true);
     cr_assert_eq(meta->slab_dirty[index], true);
 
@@ -357,6 +358,7 @@ Test(slab_group_allocate, allocate_new_meta)
     struct slab_meta *meta_after = page_begin(ptr);
     size_t index = slab_meta_retreive_index(ptr);
 
+    cr_assert_eq(index, 0);
     cr_assert_neq(meta_after, meta_before);
     cr_assert_eq(meta_after->slab_allocated[index], true);
     cr_assert_eq(meta_after->slab_dirty[index], true);

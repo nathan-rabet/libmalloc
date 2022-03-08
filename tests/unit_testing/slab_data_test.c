@@ -37,7 +37,7 @@ Test(slab_data_from_meta_index, offset_end)
     slab_group_destroy_all(slab_group);
 }
 
-Test(slab_data_from_meta_index, offset_out_of_range)
+Test(slab_data_from_meta_index, offset_out_of_range, .disabled = true)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
@@ -51,7 +51,7 @@ Test(slab_data_from_meta_index, offset_out_of_range)
     slab_group_destroy_all(slab_group);
 }
 
-Test(slab_data_from_meta_index, null_param)
+Test(slab_data_from_meta_index, null_param, .disabled = true)
 {
     struct slab_data *addr = slab_data_from_meta_index(NULL, 0);
     cr_assert_null(addr);

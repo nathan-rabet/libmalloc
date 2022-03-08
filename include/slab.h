@@ -48,7 +48,7 @@ struct slab_meta
                                          // Used for calloc()
 };
 
-#define SLAB_HEADER_DATA_SIZE (sizeof(byte_t *) + 2 * sizeof(uint64_t))
+#define SLAB_HEADER_DATA_SIZE (sizeof(bool *) + 2 * sizeof(uint64_t))
 /**
  * @brief A slab_data is where the user data is stored.
  *
