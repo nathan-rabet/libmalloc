@@ -70,13 +70,11 @@ int8_t cache_find_by_virginity(struct slab_cache *cache, bool is_dirty);
 int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin);
 
 /**
- * @brief Find a cache entry by its meta address.
+ * @brief Delete all cache entries wich have the same slab meta.
  *
- * @param cache The cache to search in.
- * @param slab_meta The meta address to search.
- * @return int8_t The index of the entry if found, -1 otherwise.
+ * @param cache The cache to delete from.
+ * @param slab_meta The meta address to search in.
  */
-int8_t cache_find_by_slab_meta(struct slab_cache *cache,
-                               struct slab_meta *slab_meta);
+void delete_all_occ_meta(struct slab_cache *cache, struct slab_meta *slab_meta);
 
 #endif /* CACHE_H */

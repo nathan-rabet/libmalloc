@@ -103,15 +103,7 @@ struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta)
 
     // TODO : Delete the slab group if no more meta
     // Delete the cache entry containing the slab meta
-    for (size_t i = 0; i < NB_CACHED_ENTRY; i++)
-    {
-        int8_t slab_meta_cache_index =
-            cache_find_by_slab_meta(&slab_meta->common_group->cache, slab_meta);
-
-        if (slab_meta_cache_index != -1)
-            cache_delete_by_index(&slab_meta->common_group->cache,
-                                  slab_meta_cache_index);
-    }
+    delete_all_occ_meta(&slab_meta->common_group->cache, slab_meta);
 
     // Delete slab_meta & the corresponding slab_data's
     if (munmap(slab_meta->slabs_data, get_meta_size(slab_meta)) == -1

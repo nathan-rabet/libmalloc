@@ -56,12 +56,12 @@ int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin)
     return -1;
 }
 
-int8_t cache_find_by_slab_meta(struct slab_cache *cache,
-                               struct slab_meta *slab_meta)
+void delete_all_occ_meta(struct slab_cache *cache, struct slab_meta *slab_meta)
 {
-    for (int8_t i; cache && i < cache->nb_cached_slabs; i++)
+    for (int8_t i = 0; cache && i < cache->nb_cached_slabs; i++)
         if (cache->cached_slabs[i].slab_meta == slab_meta)
-            return i;
-
-    return -1;
+        {
+            cache_delete_by_index(cache, i);
+            i = -1;
+        }
 }

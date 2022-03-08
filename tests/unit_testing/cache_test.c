@@ -271,35 +271,36 @@ Test(cache_find_must_be_virgin, want_virgin_but_u_are_simp)
     cr_assert_eq(index, -1);
 }
 
-Test(cache_find_by_slab_meta, null_params)
+Test(delete_all_occ_meta, null_params)
 {
-    int8_t index = cache_find_by_slab_meta(NULL, NULL);
-    cr_assert_eq(index, -1);
+    // Must not crash
+    delete_all_occ_meta(NULL, NULL);
 }
 
-Test(cache_find_by_slab_meta, find_by_null)
+Test(delete_all_occ_meta, find_by_null)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+    cache.cached_slabs->slab_meta = NULL;
+
+    delete_all_occ_meta(&cache, NULL);
+    cr_assert_eq(cache.nb_cached_slabs, 0);
+}
+
+Test(delete_all_occ_meta, find_first)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
 
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    int8_t index = cache_find_by_slab_meta(&cache, NULL);
-    cr_assert_eq(index, -1);
+    delete_all_occ_meta(&cache, &slab_meta);
+    cr_assert_eq(cache.nb_cached_slabs, 0);
 }
 
-Test(cache_find_by_slab_meta, find_first)
-{
-    struct slab_cache cache = { 0 };
-    struct slab_meta slab_meta;
-
-    cache_add_data(&cache, &slab_meta, 32, false);
-
-    int8_t index = cache_find_by_slab_meta(&cache, &slab_meta);
-    cr_assert_eq(index, 0);
-}
-
-Test(cache_find_by_slab_meta, find_second)
+Test(delete_all_occ_meta, find_second)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
@@ -309,11 +310,11 @@ Test(cache_find_by_slab_meta, find_second)
     cache.cached_slabs[0].free_bit_index = 0;
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    int8_t index = cache_find_by_slab_meta(&cache, &slab_meta);
-    cr_assert_eq(index, 1, "index: %d", index);
+    delete_all_occ_meta(&cache, &slab_meta);
+    cr_assert_eq(cache.nb_cached_slabs, 1);
 }
 
-Test(cache_find_by_slab_meta, find_last)
+Test(delete_all_occ_meta, find_last)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
@@ -325,6 +326,19 @@ Test(cache_find_by_slab_meta, find_last)
 
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    int8_t index = cache_find_by_slab_meta(&cache, &slab_meta);
-    cr_assert_eq(index, 2, "index: %d", index);
+    delete_all_occ_meta(&cache, &slab_meta);
+    cr_assert_eq(cache.nb_cached_slabs, 2);
+}
+
+Test(delete_all_occ_meta, find_all)
+{
+    struct slab_cache cache = { 0 };
+    struct slab_meta slab_meta;
+
+    cache_add_data(&cache, &slab_meta, 32, false);
+    cache_add_data(&cache, &slab_meta, 32, false);
+    cache_add_data(&cache, &slab_meta, 32, false);
+
+    delete_all_occ_meta(&cache, &slab_meta);
+    cr_assert_eq(cache.nb_cached_slabs, 0);
 }
