@@ -18,6 +18,10 @@ int main(void)
     bench_malloc_tiny2(42);
     bench_malloc_big1(42);
     bench_malloc_big2(42);
-    bench_malloc_thread_local(42);
-    bench_malloc_thread_stress(42);
+
+    // TODO: multithreaded benchmarks
+    // bench_malloc_thread_local(42);
+    // bench_malloc_thread_stress(42);
+
+    return 0;
 }

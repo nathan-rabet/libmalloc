@@ -8,6 +8,7 @@
         "cast.h": "c",
         "stdint.h": "c",
         "cache.h": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "random": "c"
     }
 }

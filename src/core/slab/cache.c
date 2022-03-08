@@ -1,5 +1,8 @@
 #include "cache.h"
 
+#include "maths.h"
+
+// ? OK
 void cache_add_data(struct slab_cache *cache, struct slab_meta *slab_meta,
                     uint64_t free_bit_index, bool is_dirty)
 {
@@ -13,6 +16,7 @@ void cache_add_data(struct slab_cache *cache, struct slab_meta *slab_meta,
     }
 }
 
+// ? OK
 void cache_delete_by_index(struct slab_cache *cache, uint8_t index)
 {
     if (cache->nb_cached_slabs > 0 && index < cache->nb_cached_slabs)
@@ -27,8 +31,6 @@ void cache_delete_by_index(struct slab_cache *cache, uint8_t index)
         case 1:
             cache->cached_slabs[1] = cache->cached_slabs[2];
             break;
-
-        case 2:
         default:
             break;
         }
@@ -37,31 +39,35 @@ void cache_delete_by_index(struct slab_cache *cache, uint8_t index)
     }
 }
 
+// ? OK
 int8_t cache_find_by_virginity(struct slab_cache *cache, bool is_dirty)
 {
-    for (int8_t i; cache && i < cache->nb_cached_slabs; i++)
-        if (cache->cached_slabs[i].is_dirty == is_dirty)
-            return i;
+    if (cache)
+        for (int8_t i; i < cache->nb_cached_slabs; i++)
+            if (cache->cached_slabs[i].is_dirty == is_dirty)
+                return i;
 
     return -1;
 }
 
 int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin)
 {
-    for (int8_t i; cache && i < cache->nb_cached_slabs; i++)
-        if (!must_be_virgin
-            || cache->cached_slabs[i].is_dirty == !must_be_virgin)
-            return i;
+    if (cache)
+        for (int8_t i; i < cache->nb_cached_slabs; i++)
+            if (IMPLIES(must_be_virgin,
+                        cache->cached_slabs[i].is_dirty == false))
+                return i;
 
     return -1;
 }
 
 void delete_all_occ_meta(struct slab_cache *cache, struct slab_meta *slab_meta)
 {
-    for (int8_t i = 0; cache && i < cache->nb_cached_slabs; i++)
-        if (cache->cached_slabs[i].slab_meta == slab_meta)
-        {
-            cache_delete_by_index(cache, i);
-            i = -1;
-        }
+    if (cache)
+        for (int8_t i = 0; i < cache->nb_cached_slabs; i++)
+            if (cache->cached_slabs[i].slab_meta == slab_meta)
+            {
+                cache_delete_by_index(cache, i);
+                i = -1;
+            }
 }

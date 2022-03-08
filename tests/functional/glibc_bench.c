@@ -5,10 +5,10 @@
 
 #define Len 1000
 
-void bench_malloc_sparse(int N)
+void bench_malloc_sparse(unsigned long N)
 {
     void *p[Len];
-    int i, j;
+    unsigned long i, j;
     for (j = 0; j < N; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
@@ -23,10 +23,10 @@ void bench_malloc_sparse(int N)
             free(p[i]);
     }
 }
-void bench_malloc_bubble(int N)
+void bench_malloc_bubble(unsigned long N)
 {
     void *p[Len];
-    int i, j;
+    unsigned long i, j;
     for (j = 0; j < N; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
@@ -38,10 +38,10 @@ void bench_malloc_bubble(int N)
             free(p[i]);
     }
 }
-void bench_malloc_tiny1(int N)
+void bench_malloc_tiny1(unsigned long N)
 {
     void *p[Len];
-    int i, j;
+    unsigned long i, j;
     for (j = 0; j < N; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
@@ -54,10 +54,10 @@ void bench_malloc_tiny1(int N)
         }
     }
 }
-void bench_malloc_tiny2(int N)
+void bench_malloc_tiny2(unsigned long N)
 {
     void *p[Len];
-    int i, j;
+    unsigned long i, j;
     for (j = 0; j < N; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
@@ -69,10 +69,10 @@ void bench_malloc_tiny2(int N)
         free(p[0]);
     }
 }
-void bench_malloc_big1(int N)
+void bench_malloc_big1(unsigned long N)
 {
     void *p[Len];
-    int i, j;
+    unsigned long i, j;
     for (j = 0; j < N; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
@@ -85,10 +85,10 @@ void bench_malloc_big1(int N)
         }
     }
 }
-void bench_malloc_big2(int N)
+void bench_malloc_big2(unsigned long N)
 {
     void *p[Len];
-    int i, j;
+    unsigned i, j;
     for (j = 0; j < N; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
@@ -116,13 +116,13 @@ static unsigned rng(unsigned *r)
     return *r = *r * 1103515245 + 12345;
 }
 
-static int N;
+static unsigned long N;
 
 static void *stress(void *arg)
 {
     struct foo *foo = arg;
     unsigned r = (unsigned)pthread_self();
-    int i, j;
+    unsigned long i, j;
     size_t sz;
     void *p;
 
@@ -148,7 +148,7 @@ static void *stress(void *arg)
     return 0;
 }
 
-void bench_malloc_thread_stress(int n)
+void bench_malloc_thread_stress(unsigned long n)
 {
     struct foo foo[SH_COUNT] = { { 0 } };
     pthread_t td1, td2;
@@ -161,7 +161,7 @@ void bench_malloc_thread_stress(int n)
     pthread_join(td2, &res);
 }
 
-void bench_malloc_thread_local(int n)
+void bench_malloc_thread_local(unsigned long n)
 {
     struct foo foo1[SH_COUNT] = { { 0 } };
     struct foo foo2[SH_COUNT] = { { 0 } };

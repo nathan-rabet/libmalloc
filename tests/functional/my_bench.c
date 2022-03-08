@@ -16,13 +16,13 @@ void malloc_then_free_then_malloc(void)
 void heap_fucker(void)
 {
     void *p[100];
-    int i, j;
+    unsigned long i, j;
     for (j = 0; j < 42; j++)
     {
         for (i = 0; i < sizeof p / sizeof *p; i++)
         {
             p[i] = malloc(4000);
-            memset(p[i] - SLAB_HEADER_DATA_SIZE, 0, 4000);
+            memset((char *)p[i] - SLAB_HEADER_DATA_SIZE, 0, 4000);
         }
         for (i = 0; i < sizeof p / sizeof *p; i++)
             if (i % 150)
@@ -34,7 +34,7 @@ void heap_fucker(void)
 
 void basic1(void)
 {
-    int *p = malloc(12 * sizeof(int));
+    unsigned long *p = malloc(12 * sizeof(int));
 
     for (size_t i = 0; i < 12; i++)
         p[i] = i;
@@ -44,7 +44,7 @@ void basic1(void)
 
 void basic2()
 {
-    int *p = malloc(12 * sizeof(int));
+    unsigned long *p = malloc(12 * sizeof(int));
 
     for (size_t i = 0; i < 12; i++)
         p[i] = i;

@@ -10,7 +10,7 @@ OBJS = $(SRC:.c=.o)
 SRC_AND_LIB = src/core/slab/cache.c src/core/slab/slab_meta.c src/core/slab/slab_group.c src/core/slab/slab_data.c src/core/utils/maths.c src/core/utils/bit.c src/core/utils/cast.c src/core/utils/overflow.c src/malloc.c src/additional_malloc.c
 OBJS_AND_LIB = $(SRC_AND_LIB:.c=.o)
 
-FUNCTIONAL_SRC = tests/functional/libc_bench.c
+FUNCTIONAL_SRC = tests/functional/glibc_bench.c
 FUNCTIONAL_SRC += tests/functional/main_bench.c
 FUNCTIONAL_SRC += tests/functional/my_bench.c
 
