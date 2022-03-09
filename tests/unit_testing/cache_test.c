@@ -3,18 +3,22 @@
 #include "cache.h"
 #include "slab.h"
 
+#ifndef DEBUG
 Test(cache_add_data, add_null)
 {
     struct slab_cache cache = { 0 };
     cache_add_data(&cache, NULL, 0, false);
     cr_assert_eq(cache.nb_cached_slabs, 0);
 }
+#endif
 
+#ifndef DEBUG
 Test(cache_add_data, add_null_cache)
 {
     // Must not crash
     cache_add_data(NULL, NULL, 0, false);
 }
+#endif
 
 Test(cache_add_data, add_data)
 {
@@ -155,11 +159,13 @@ Test(cache_delete_by_index, delete_middle)
     cr_assert_eq(cache.cached_slabs[1].free_bit_index, 3);
 }
 
+#ifndef DEBUG
 Test(cache_find_by_virginity, null_params)
 {
     int8_t index = cache_find_by_virginity(NULL, NULL);
     cr_assert_eq(index, -1);
 }
+#endif
 
 Test(cache_find_by_virginity, size_0)
 {
@@ -209,11 +215,13 @@ Test(cache_find_by_virginity, find_last)
     cr_assert_eq(index, 2, "index: %d", index);
 }
 
+#ifndef DEBUG
 Test(cache_find_must_be_virgin, null_params)
 {
     int8_t index = cache_find_must_be_virgin(NULL, false);
     cr_assert_eq(index, -1);
 }
+#endif
 
 Test(cache_find_must_be_virgin, size_0)
 {
@@ -271,12 +279,15 @@ Test(cache_find_must_be_virgin, want_virgin_but_u_are_simp)
     cr_assert_eq(index, -1);
 }
 
+#ifndef DEBUG
 Test(cache_delete_all_occ_meta, null_params)
 {
     // Must not crash
     cache_delete_all_occ_meta(NULL, NULL);
 }
+#endif
 
+#ifndef DEBUG
 Test(cache_delete_all_occ_meta, find_by_null)
 {
     struct slab_cache cache = { 0 };
@@ -288,6 +299,7 @@ Test(cache_delete_all_occ_meta, find_by_null)
     cache_delete_all_occ_meta(&cache, NULL);
     cr_assert_eq(cache.nb_cached_slabs, 0);
 }
+#endif
 
 Test(cache_delete_all_occ_meta, find_first)
 {

@@ -57,11 +57,13 @@ Test(slab_data_from_meta_index, null_param, .disabled = true)
     cr_assert_null(addr);
 }
 
+#ifndef DEBUG
 Test(slab_data_init, null)
 {
     // Must not crash
     slab_data_init(NULL, 0);
 }
+#endif
 
 Test(slab_data_init, basic)
 {
@@ -133,8 +135,10 @@ Test(coin_coin, not_valid)
     slab_group_destroy_all();
 }
 
+#ifndef DEBUG
 Test(slab_data_free, null)
 {
     // Must not crash
     slab_data_free(NULL);
 }
+#endif

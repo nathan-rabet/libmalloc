@@ -61,6 +61,7 @@ Test(slab_meta_create, create_basic)
     slab_group_destroy_all();
 }
 
+#ifndef DEBUG
 Test(slab_meta_create, create_no_group)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
@@ -69,11 +70,14 @@ Test(slab_meta_create, create_no_group)
 
     slab_group_destroy_all();
 }
+#endif
 
+#ifndef DEBUG
 Test(slab_meta_create, create_null_arguments)
 {
     cr_assert_null(slab_meta_create(NULL, NULL));
 }
+#endif
 
 Test(slab_meta_create, logarithmic_no_decrease)
 {
@@ -124,10 +128,12 @@ Test(slab_meta_create, check_cache)
     slab_group_destroy_all();
 }
 
+#ifndef DEBUG
 Test(slab_meta_delete, delete_nothing)
 {
     cr_assert_null(slab_meta_delete(NULL));
 }
+#endif
 
 Test(slab_meta_delete, delete_single)
 {
@@ -135,7 +141,9 @@ Test(slab_meta_delete, delete_single)
 
     slab_meta_delete(slab_group->slabs_meta);
 
-    // cr_assert_null(slab_group->slabs_meta);
+    // Thread unsafe
+    cr_skip("This test is thread unsafe");
+    cr_assert_null(slab_groups_head);
 
     slab_group_destroy_all();
 }
@@ -147,7 +155,7 @@ Test(slab_meta_delete, delete_first)
     slab_group->slabs_meta =
         slab_meta_create(slab_group->slabs_meta, slab_group);
 
-    slab_meta_delete(slab_group->slabs_meta);
+    cr_assert_eq(slab_meta_delete(slab_group->slabs_meta), true);
 
     cr_assert_not_null(slab_group->slabs_meta);
     cr_assert_null(slab_group->slabs_meta->prev);
@@ -187,7 +195,7 @@ Test(slab_meta_delete, delete_middle)
     struct slab_meta *slab_meta_1 = slab_group->slabs_meta;
 
     // slab_meta_2 is the middle one
-    slab_meta_delete(slab_meta_2);
+    cr_assert_eq(slab_meta_delete(slab_meta_2), true);
 
     cr_assert_eq(slab_group->slabs_meta, slab_meta_1);
     cr_assert_eq(slab_group->slabs_meta->next, slab_meta_3);
@@ -196,11 +204,14 @@ Test(slab_meta_delete, delete_middle)
     slab_group_destroy_all();
 }
 
+#ifndef DEBUG
 Test(slab_meta_free, free_null)
 {
     cr_assert_eq(slab_meta_free(NULL, 0), false);
 }
+#endif
 
+#ifndef DEBUG
 Test(slab_meta_free, free_wrong_index)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
@@ -214,7 +225,9 @@ Test(slab_meta_free, free_wrong_index)
 
     slab_group_destroy_all();
 }
+#endif
 
+#ifndef DEBUG
 Test(slab_meta_free, free_wrong_index_2)
 {
     struct slab_group *slab_group = slab_group_create(
@@ -233,6 +246,7 @@ Test(slab_meta_free, free_wrong_index_2)
 
     slab_group_destroy_all();
 }
+#endif
 
 Test(slab_meta_free, free_already_free)
 {

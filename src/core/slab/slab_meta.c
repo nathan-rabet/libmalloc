@@ -1,9 +1,9 @@
+#include <assert.h>
 #include <sys/mman.h>
 
 #include "cast.h"
 #include "maths.h"
 #include "slab.h"
-
 size_t get_slab_raw_size(struct slab_meta *slabs_meta)
 {
 #ifdef DEBUG
@@ -145,7 +145,7 @@ bool slab_meta_delete(struct slab_meta *slab_meta)
         || munmap(slab_meta, sizeof(struct slab_meta)) == -1)
         return NULL;
 
-    return !returned_slab_meta;
+    return returned_slab_meta != NULL;
 }
 
 void slab_meta_destroy_all(struct slab_meta *slab_meta)
@@ -153,9 +153,10 @@ void slab_meta_destroy_all(struct slab_meta *slab_meta)
 #ifdef DEBUG
     assert(slab_meta);
 #endif
-    if (slab_meta)
-        while (slab_meta_delete(slab_meta))
-            ;
+
+    struct slab_group *common_group = slab_meta->common_group;
+    while (slab_meta_delete(common_group->slabs_meta))
+        ;
 }
 
 size_t slab_meta_retreive_index(bool *slabs_meta)
@@ -174,7 +175,7 @@ size_t slab_meta_retreive_index(bool *slabs_meta)
 bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin)
 {
 #ifdef DEBUG
-    assert(slabs_meta);
+    assert(slab_meta);
 #endif
     if (slab_meta)
     {
