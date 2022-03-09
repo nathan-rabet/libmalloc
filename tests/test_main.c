@@ -11,11 +11,11 @@ int main(void)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
-    for (size_t i = 0; i < MAX_META_SLAB_USED + 1; i++)
+    for (size_t i = 0; i < 50 * MAX_META_SLAB_USED; i++)
         slab_meta_allocate(slab_group->slabs_meta, false);
 
-    bool isFree = slab_meta_free(slab_group->slabs_meta, 0);
-    (void)isFree;
+    slab_meta_destroy_all(slab_group->slabs_meta);
+    slab_group_destroy_all();
 
     return 0;
 }

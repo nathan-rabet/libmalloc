@@ -75,6 +75,7 @@ int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin);
  * @param cache The cache to delete from.
  * @param slab_meta The meta address to search in.
  */
-void delete_all_occ_meta(struct slab_cache *cache, struct slab_meta *slab_meta);
+void cache_delete_all_occ_meta(struct slab_cache *cache,
+                               struct slab_meta *slab_meta);
 
 #endif /* CACHE_H */

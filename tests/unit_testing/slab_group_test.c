@@ -23,7 +23,7 @@ Test(slab_group_create, group_create_check_meta)
     cr_assert_eq(power_2(group->slabs_meta->common_group->size_multiplicity),
                  1);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_create, group_create_check_zero)
@@ -35,7 +35,7 @@ Test(slab_group_create, group_create_check_zero)
     cr_assert_eq(group->next, NULL);
     cr_assert_eq(group->prev, NULL);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_create, group_create_increasing)
@@ -67,7 +67,7 @@ Test(slab_group_create, group_create_increasing)
     cr_assert_eq(parser->size_multiplicity, 0);
     cr_assert_eq(parser->prev, NULL);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_create, group_create_deacreasing)
@@ -98,7 +98,7 @@ Test(slab_group_create, group_create_deacreasing)
     cr_assert_eq(parser->size_multiplicity, 0);
     cr_assert_eq(parser->prev, NULL);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_create, group_create_duplicate)
@@ -136,7 +136,7 @@ Test(slab_group_create, group_create_duplicate)
     cr_assert_eq(parser->size_multiplicity, 0);
     cr_assert_eq(parser->prev, NULL);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_delete, delete_first)
@@ -146,9 +146,9 @@ Test(slab_group_delete, delete_first)
     group = slab_group_create(2, group);
     group = slab_group_create(3, group);
 
-    group = slab_group_delete(group);
+    struct slab_group *parser = group->next;
 
-    struct slab_group *parser = group;
+    cr_assert_eq(slab_group_delete(group), true);
 
     // Increasing order
     cr_assert_eq(parser->size_multiplicity, 1);
@@ -175,7 +175,7 @@ Test(slab_group_delete, delete_middle)
     group = slab_group_create(3, group);
 
     // Delete group
-    group = slab_group_delete(group->next->next);
+    cr_assert_eq(slab_group_delete(group->next->next), true);
 
     struct slab_group *parser = group;
     // Increasing order
@@ -193,7 +193,7 @@ Test(slab_group_delete, delete_middle)
     cr_assert_eq(parser->size_multiplicity, 0);
     cr_assert_eq(parser->prev, NULL);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_delete, delete_last)
@@ -203,7 +203,7 @@ Test(slab_group_delete, delete_last)
     group = slab_group_create(2, group);
     group = slab_group_create(3, group);
 
-    group = slab_group_delete(group->next->next->next);
+    cr_assert_eq(slab_group_delete(group->next->next->next), true);
 
     struct slab_group *parser = group;
 
@@ -222,7 +222,20 @@ Test(slab_group_delete, delete_last)
     cr_assert_eq(parser->size_multiplicity, 0);
     cr_assert_eq(parser->prev, NULL);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
+}
+
+Test(slab_group_delete, delete_single)
+{
+    struct slab_group *group = slab_group_create(0, NULL);
+
+    cr_assert_eq(slab_group_delete(group), false);
+
+    // Thread unsafe for the moment
+    cr_skip("Thread unsafe");
+    cr_assert_null(slab_groups_head);
+
+    slab_group_destroy_all();
 }
 
 Test(slab_group_find_enough_space, find_enough_space_basic)
@@ -236,7 +249,7 @@ Test(slab_group_find_enough_space, find_enough_space_basic)
 
     cr_assert_eq(found->size_multiplicity, 2);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_find_enough_space, first)
@@ -250,7 +263,7 @@ Test(slab_group_find_enough_space, first)
 
     cr_assert_eq(found->size_multiplicity, 0);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_find_enough_space, last)
@@ -264,7 +277,7 @@ Test(slab_group_find_enough_space, last)
 
     cr_assert_eq(found->size_multiplicity, 3);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_find_enough_space, not_perfect_log)
@@ -278,7 +291,7 @@ Test(slab_group_find_enough_space, not_perfect_log)
 
     cr_assert_eq(found->size_multiplicity, 3);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_find_enough_space, not_found)
@@ -292,7 +305,7 @@ Test(slab_group_find_enough_space, not_found)
 
     cr_assert_null(found);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_find_enough_space, not_found_2)
@@ -304,7 +317,7 @@ Test(slab_group_find_enough_space, not_found_2)
 
     cr_assert_null(found);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_allocate, allocate_basic)
@@ -327,7 +340,7 @@ Test(slab_group_allocate, allocate_basic)
     cr_assert_eq(meta->slab_allocated[index], true);
     cr_assert_eq(meta->slab_dirty[index], true);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_allocate, allocate_new_meta)
@@ -363,7 +376,7 @@ Test(slab_group_allocate, allocate_new_meta)
     cr_assert_eq(meta_after->slab_allocated[index], true);
     cr_assert_eq(meta_after->slab_dirty[index], true);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_allocate, virginity)
@@ -390,7 +403,7 @@ Test(slab_group_allocate, virginity)
     cr_assert_eq(meta->slab_allocated[index], true);
     cr_assert_eq(meta->slab_dirty[index], true);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }
 
 Test(slab_group_allocate, not_used_and_virgin)
@@ -420,5 +433,5 @@ Test(slab_group_allocate, not_used_and_virgin)
     cr_assert_eq(meta->slab_allocated[index], true);
     cr_assert_eq(meta->slab_dirty[index], true);
 
-    slab_group_destroy_all(group);
+    slab_group_destroy_all();
 }

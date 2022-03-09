@@ -11,7 +11,7 @@ Test(slab_meta_size, slab_raw_size)
     size_t slab_size = get_slab_raw_size(slab_group->slabs_meta);
     cr_assert_eq(slab_size, 4, "Slab RAW size is %d", slab_size);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_size, slab_size)
@@ -22,7 +22,7 @@ Test(slab_meta_size, slab_size)
     cr_assert_eq(slab_size, SLAB_HEADER_DATA_SIZE + 4, "Slab TOTAL size is %d",
                  slab_size);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_size, meta_total_size)
@@ -33,7 +33,7 @@ Test(slab_meta_size, meta_total_size)
     cr_assert_eq(slab_size, MAX_META_SLAB_USED * (SLAB_HEADER_DATA_SIZE + 4),
                  "Slabs sizes are %d", slab_size);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_create, create_basic)
@@ -58,7 +58,7 @@ Test(slab_meta_create, create_basic)
                  "Slab used len is %d",
                  slab_group->slabs_meta->max_handled_slabs);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_create, create_no_group)
@@ -67,7 +67,7 @@ Test(slab_meta_create, create_no_group)
 
     cr_assert_null(slab_meta_create(slab_group->slabs_meta, NULL));
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_create, create_null_arguments)
@@ -86,12 +86,13 @@ Test(slab_meta_create, logarithmic_no_decrease)
                  "Slab used len is %ld",
                  slab_group->slabs_meta->max_handled_slabs);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 // ! FIXME: This test is not working
-Test(slab_meta_create, logarithmic_decreases, .disabled = true)
+Test(slab_meta_create, logarithmic_decreases)
 {
+    cr_skip("This test is not working");
     for (size_t i = 0; i < MAX_META_SLAB_USED; i++)
     {
         struct slab_group *slab_group =
@@ -103,7 +104,7 @@ Test(slab_meta_create, logarithmic_decreases, .disabled = true)
         cr_assert_eq(slab_group->slabs_meta->max_handled_slabs,
                      MAX(1, MAX_META_SLAB_USED - 1 - i), "Slab used len is %ld",
                      slab_group->slabs_meta->max_handled_slabs);
-        slab_group_destroy_all(slab_group);
+        slab_group_destroy_all();
     }
 }
 
@@ -120,7 +121,7 @@ Test(slab_meta_create, check_cache)
         cr_assert_eq(slab_group->cache.cached_slabs[i].is_dirty, false);
     }
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_delete, delete_nothing)
@@ -132,11 +133,11 @@ Test(slab_meta_delete, delete_single)
 {
     struct slab_group *slab_group = slab_group_create(2, NULL);
 
-    slab_group->slabs_meta = slab_meta_delete(slab_group->slabs_meta);
+    slab_meta_delete(slab_group->slabs_meta);
 
-    cr_assert_null(slab_group->slabs_meta);
+    // cr_assert_null(slab_group->slabs_meta);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_delete, delete_first)
@@ -146,13 +147,13 @@ Test(slab_meta_delete, delete_first)
     slab_group->slabs_meta =
         slab_meta_create(slab_group->slabs_meta, slab_group);
 
-    slab_group->slabs_meta = slab_meta_delete(slab_group->slabs_meta);
+    slab_meta_delete(slab_group->slabs_meta);
 
     cr_assert_not_null(slab_group->slabs_meta);
     cr_assert_null(slab_group->slabs_meta->prev);
     cr_assert_null(slab_group->slabs_meta->next);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_delete, delete_second)
@@ -170,7 +171,7 @@ Test(slab_meta_delete, delete_second)
     cr_assert_null(slab_group->slabs_meta->prev);
     cr_assert_null(slab_group->slabs_meta->next);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_delete, delete_middle)
@@ -186,13 +187,13 @@ Test(slab_meta_delete, delete_middle)
     struct slab_meta *slab_meta_1 = slab_group->slabs_meta;
 
     // slab_meta_2 is the middle one
-    slab_group->slabs_meta = slab_meta_delete(slab_meta_2);
+    slab_meta_delete(slab_meta_2);
 
     cr_assert_eq(slab_group->slabs_meta, slab_meta_1);
     cr_assert_eq(slab_group->slabs_meta->next, slab_meta_3);
     cr_assert_null(slab_group->slabs_meta->prev);
     cr_assert_null(slab_group->slabs_meta->next->next);
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_free, free_null)
@@ -211,7 +212,7 @@ Test(slab_meta_free, free_wrong_index)
                  "Slab used len is %ld",
                  slab_group->slabs_meta->max_handled_slabs);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_free, free_wrong_index_2)
@@ -230,7 +231,7 @@ Test(slab_meta_free, free_wrong_index_2)
                  MAX_META_SLAB_USED - 1, "Slab used len is %ld",
                  slab_group->slabs_meta->max_handled_slabs);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_free, free_already_free)
@@ -243,7 +244,7 @@ Test(slab_meta_free, free_already_free)
                  "Slab used len is %ld",
                  slab_group->slabs_meta->max_handled_slabs);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_free, free_no_munmap)
@@ -257,7 +258,7 @@ Test(slab_meta_free, free_no_munmap)
     cr_assert_eq(slab_group->slabs_meta->nb_allocated_slabs, 1);
     cr_assert_not_null(slab_group->slabs_meta);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_meta_free, free_munmap)
@@ -273,10 +274,10 @@ Test(slab_meta_free, free_munmap)
 
     cr_assert_null(slab_group->slabs_meta->next);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
-Test(slab_meta_retreive_index, retreive_slab_meta_index_null)
+Test(slab_meta_retreive_index, retreive_slab_meta_index_null, .disabled = true)
 {
     cr_assert_eq(slab_meta_retreive_index(NULL), 0);
 }
@@ -290,5 +291,16 @@ Test(slab_meta_retreive_index, indexes)
                          slab_group->slabs_meta->slab_allocated + i),
                      i);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
+}
+
+Test(slab_meta_destroy_all, delete_all)
+{
+    struct slab_group *slab_group = slab_group_create(2, NULL);
+
+    for (size_t i = 0; i < 50 * MAX_META_SLAB_USED; i++)
+        slab_meta_allocate(slab_group->slabs_meta, false);
+
+    slab_meta_destroy_all(slab_group->slabs_meta);
+    slab_group_destroy_all();
 }

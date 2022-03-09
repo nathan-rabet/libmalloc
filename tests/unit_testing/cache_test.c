@@ -271,13 +271,13 @@ Test(cache_find_must_be_virgin, want_virgin_but_u_are_simp)
     cr_assert_eq(index, -1);
 }
 
-Test(delete_all_occ_meta, null_params)
+Test(cache_delete_all_occ_meta, null_params)
 {
     // Must not crash
-    delete_all_occ_meta(NULL, NULL);
+    cache_delete_all_occ_meta(NULL, NULL);
 }
 
-Test(delete_all_occ_meta, find_by_null)
+Test(cache_delete_all_occ_meta, find_by_null)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
@@ -285,22 +285,22 @@ Test(delete_all_occ_meta, find_by_null)
     cache_add_data(&cache, &slab_meta, 32, false);
     cache.cached_slabs->slab_meta = NULL;
 
-    delete_all_occ_meta(&cache, NULL);
+    cache_delete_all_occ_meta(&cache, NULL);
     cr_assert_eq(cache.nb_cached_slabs, 0);
 }
 
-Test(delete_all_occ_meta, find_first)
+Test(cache_delete_all_occ_meta, find_first)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
 
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    delete_all_occ_meta(&cache, &slab_meta);
+    cache_delete_all_occ_meta(&cache, &slab_meta);
     cr_assert_eq(cache.nb_cached_slabs, 0);
 }
 
-Test(delete_all_occ_meta, find_second)
+Test(cache_delete_all_occ_meta, find_second)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
@@ -310,11 +310,11 @@ Test(delete_all_occ_meta, find_second)
     cache.cached_slabs[0].free_bit_index = 0;
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    delete_all_occ_meta(&cache, &slab_meta);
+    cache_delete_all_occ_meta(&cache, &slab_meta);
     cr_assert_eq(cache.nb_cached_slabs, 1);
 }
 
-Test(delete_all_occ_meta, find_last)
+Test(cache_delete_all_occ_meta, find_last)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
@@ -326,11 +326,11 @@ Test(delete_all_occ_meta, find_last)
 
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    delete_all_occ_meta(&cache, &slab_meta);
+    cache_delete_all_occ_meta(&cache, &slab_meta);
     cr_assert_eq(cache.nb_cached_slabs, 2);
 }
 
-Test(delete_all_occ_meta, find_all)
+Test(cache_delete_all_occ_meta, find_all)
 {
     struct slab_cache cache = { 0 };
     struct slab_meta slab_meta;
@@ -339,6 +339,6 @@ Test(delete_all_occ_meta, find_all)
     cache_add_data(&cache, &slab_meta, 32, false);
     cache_add_data(&cache, &slab_meta, 32, false);
 
-    delete_all_occ_meta(&cache, &slab_meta);
+    cache_delete_all_occ_meta(&cache, &slab_meta);
     cr_assert_eq(cache.nb_cached_slabs, 0);
 }

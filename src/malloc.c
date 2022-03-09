@@ -6,22 +6,22 @@
 #include "overflow.h"
 #include "slab.h"
 
-static struct slab_group *slab_group = NULL;
-
 __attribute__((visibility("default"))) void *malloc(size_t size)
 {
     if (size > 0)
     {
-        if (!slab_group)
-            slab_group = slab_group_create(log2ceil(size), NULL);
+        if (!slab_groups_head)
+            slab_groups_head = slab_group_create(log2ceil(size), NULL);
 
         struct slab_group *my_slab_group =
-            slab_group_find_enough_space(slab_group, size);
+            slab_group_find_enough_space(slab_groups_head, size);
 
         if (!my_slab_group)
         {
-            slab_group = slab_group_create(log2ceil(size), slab_group);
-            my_slab_group = slab_group_find_enough_space(slab_group, size);
+            slab_groups_head =
+                slab_group_create(log2ceil(size), slab_groups_head);
+            my_slab_group =
+                slab_group_find_enough_space(slab_groups_head, size);
             if (!my_slab_group)
                 return NULL;
         }
@@ -92,17 +92,18 @@ __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
     {
         size_t total_size = nmemb * size;
 
-        if (!slab_group)
-            slab_group = slab_group_create(log2ceil(total_size), NULL);
+        if (!slab_groups_head)
+            slab_groups_head = slab_group_create(log2ceil(total_size), NULL);
 
         struct slab_group *my_slab_group =
-            slab_group_find_enough_space(slab_group, total_size);
+            slab_group_find_enough_space(slab_groups_head, total_size);
 
         if (!my_slab_group)
         {
-            slab_group = slab_group_create(log2ceil(total_size), slab_group);
+            slab_groups_head =
+                slab_group_create(log2ceil(total_size), slab_groups_head);
             my_slab_group =
-                slab_group_find_enough_space(slab_group, total_size);
+                slab_group_find_enough_space(slab_groups_head, total_size);
             if (!my_slab_group)
                 return NULL;
         }

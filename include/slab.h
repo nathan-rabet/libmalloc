@@ -28,6 +28,9 @@ struct slab_group
     struct slab_meta *slabs_meta; // Bitmap of free slabs
 };
 
+// Head of the slab_group linked list
+__attribute__((unused)) static struct slab_group *slab_groups_head = NULL;
+
 #define SLAB_HEADER_META_SIZE sizeof(struct slab_meta)
 /**
  * @brief A slab_meta gives information about a set of slabs.
@@ -82,19 +85,21 @@ struct slab_group *slab_group_create(uint8_t size_multiplicity,
 
 /**
  * @brief Delete a slab group and refactor the linked list of slab groups.
+ * The static linked list of slab groups is modified.
  *
  * @param slab_group The slab group to destroy.
  *
- * @return struct slab_group* The new slab group head, or NULL in case of error.
+ * @return true if there is still some slab group in the linked list,
+ * false otherwise.
  */
-struct slab_group *slab_group_delete(struct slab_group *slab_group);
+bool slab_group_delete(struct slab_group *slab_group);
 
 /**
  * @brief Destroy all the slab groups.
+ * This function uses the staticly defined linked list of slab groups.
  *
- * @param slab_group The head of the linked list of slab groups.
  */
-void slab_group_destroy_all(struct slab_group *slab_group);
+void slab_group_destroy_all(void);
 
 /**
  * @brief Get the slab group with the multiplicity ceil(log2(size)).
@@ -163,16 +168,16 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
  * @brief Delete a slab meta page.
  *
  * @param slab_meta The slab meta to destroy.
- * @return struct slab_meta* The new slab meta head, or NULL in case of
- * error.
+ * @return true if there is still some slabs in the slab meta,
+ * false otherwise.
  */
-struct slab_meta *slab_meta_delete(struct slab_meta *slab_meta);
+bool slab_meta_delete(struct slab_meta *slab_meta);
 
 /**
  * @brief Retreive an index of a free slab in a slab meta.
  *
  * @param slabs_meta The slab meta to search in.
- * @return size_t The index of the free slab in the slab_meta.
+ * @return ssize_t The index of the free slab in the slab_meta
  */
 size_t slab_meta_retreive_index(bool *slabs_meta);
 
@@ -189,12 +194,20 @@ bool *slab_meta_allocate(struct slab_meta *slab_meta, bool must_be_virgin);
 
 /**
  * @brief Free a slab in a slab meta.
+ * slab_meta->common_group->slab_meta may be modified.
  *
  * @param slab_meta The slab meta to free.
  * @param index The index of the slab to free.
  * @return true If the slab was freed, false otherwise.
  */
 bool slab_meta_free(struct slab_meta *slab_meta, size_t index);
+
+/**
+ * @brief Free all the meta slab pages in the given linked list.
+ *
+ * @param slab_meta The head of the linked list of slab meta to free.
+ */
+void slab_meta_destroy_all(struct slab_meta *slab_meta);
 
 // ----------------------------------------------------------------------------
 // ? Slab data

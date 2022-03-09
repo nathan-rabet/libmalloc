@@ -22,7 +22,7 @@ OBJ_TESTS = $(SRC_TESTS:.c=.o)
 all: library
 
 library_debug: $(DEBUG_LIB)
-$(DEBUG_LIB): CFLAGS += -g -fPIC -fno-builtin
+$(DEBUG_LIB): CFLAGS += -g -fPIC -fno-builtin -DDEBUG
 $(DEBUG_LIB): LDFLAGS += -Wl,--no-undefined -shared
 $(DEBUG_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^

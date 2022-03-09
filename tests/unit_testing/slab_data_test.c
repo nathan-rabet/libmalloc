@@ -17,7 +17,7 @@ Test(slab_data_from_meta_index, offset_i)
                          + i * get_slab_size(slab_group->slabs_meta));
     }
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_data_from_meta_index, offset_end)
@@ -34,7 +34,7 @@ Test(slab_data_from_meta_index, offset_end)
                      + get_meta_size(slab_group->slabs_meta)
                      - get_slab_size(slab_group->slabs_meta));
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_data_from_meta_index, offset_out_of_range, .disabled = true)
@@ -48,7 +48,7 @@ Test(slab_data_from_meta_index, offset_out_of_range, .disabled = true)
         slab_data_from_meta_index(slab_group->slabs_meta, MAX_META_SLAB_USED);
     cr_assert_null(addr);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_data_from_meta_index, null_param, .disabled = true)
@@ -89,7 +89,7 @@ Test(slab_data_init, basic)
                      slab_group->slabs_meta->slab_allocated + i);
     }
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(coin_coin, valid)
@@ -109,7 +109,7 @@ Test(coin_coin, valid)
         cr_assert_eq(coin_coin(slab_data_i), true);
     }
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(coin_coin, not_valid)
@@ -130,7 +130,7 @@ Test(coin_coin, not_valid)
     slab_data_i->canary_tail = 0xDADFEED0;
     cr_assert_eq(coin_coin(slab_data_i), false);
 
-    slab_group_destroy_all(slab_group);
+    slab_group_destroy_all();
 }
 
 Test(slab_data_free, null)
