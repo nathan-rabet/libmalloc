@@ -71,7 +71,7 @@ void bench_malloc_tiny2(unsigned long N)
 }
 void bench_malloc_big1(unsigned long N)
 {
-    void *p[1];
+    void *p[Len];
     unsigned long i, j;
     for (j = 0; j < N; j++)
     {

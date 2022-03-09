@@ -28,7 +28,7 @@ void cache_delete_by_index(struct slab_cache *cache, uint8_t index)
     assert(cache && cache->nb_cached_slabs > 0
            && index < cache->nb_cached_slabs);
 #endif
-    if (cache->nb_cached_slabs > 0 && index < cache->nb_cached_slabs)
+    if (cache && cache->nb_cached_slabs > 0 && index < cache->nb_cached_slabs)
     {
         switch (index)
         {
@@ -55,7 +55,7 @@ int8_t cache_find_by_virginity(struct slab_cache *cache, bool is_dirty)
     assert(cache);
 #endif
     if (cache)
-        for (int8_t i; i < cache->nb_cached_slabs; i++)
+        for (int8_t i = 0; i < cache->nb_cached_slabs; i++)
             if (cache->cached_slabs[i].is_dirty == is_dirty)
                 return i;
 
@@ -69,7 +69,7 @@ int8_t cache_find_must_be_virgin(struct slab_cache *cache, bool must_be_virgin)
     assert(cache);
 #endif
     if (cache)
-        for (int8_t i; i < cache->nb_cached_slabs; i++)
+        for (int8_t i = 0; i < cache->nb_cached_slabs; i++)
             if (IMPLIES(must_be_virgin,
                         cache->cached_slabs[i].is_dirty == false))
                 return i;

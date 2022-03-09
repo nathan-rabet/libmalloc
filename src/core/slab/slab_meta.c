@@ -81,17 +81,31 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
 
     // Add some virgin slabs to the cache
     // (virgins are allways better than the dirty ones)
-    if (new_slab_meta->max_handled_slabs >= NB_CACHED_ENTRY)
-        new_slab_meta->common_group->cache.nb_cached_slabs = 0;
+    // TODO : Better way to do this ?
+    size_t nb_entry_to_add;
+    if (new_slab_meta->max_handled_slabs > MAX_META_SLAB_USED)
+        nb_entry_to_add = MAX_META_SLAB_USED;
     else
-        new_slab_meta->common_group->cache.nb_cached_slabs -=
-            new_slab_meta->max_handled_slabs;
+        nb_entry_to_add = new_slab_meta->max_handled_slabs;
 
-    size_t nb_entry_to_add =
-        NB_CACHED_ENTRY - new_slab_meta->common_group->cache.nb_cached_slabs;
-    for (size_t i = 0; i < nb_entry_to_add; i++)
-        cache_add_data(&new_slab_meta->common_group->cache, new_slab_meta, i,
-                       false);
+    // Delete existing dirty slabs
+    size_t entry_index = 0;
+    for (size_t cache_i = 0;
+         entry_index < nb_entry_to_add && cache_i < NB_CACHED_ENTRY; cache_i++)
+    {
+        if (cache_i == new_slab_meta->common_group->cache.nb_cached_slabs)
+            cache_add_data(&new_slab_meta->common_group->cache, new_slab_meta,
+                           entry_index++, false);
+
+        else if (new_slab_meta->common_group->cache.cached_slabs[cache_i]
+                     .is_dirty
+                 == true)
+        {
+            cache_delete_by_index(&new_slab_meta->common_group->cache, cache_i);
+            cache_add_data(&new_slab_meta->common_group->cache, new_slab_meta,
+                           entry_index++, false);
+        }
+    }
 
     return new_slab_meta;
 }
