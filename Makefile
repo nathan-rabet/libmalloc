@@ -37,12 +37,24 @@ $(TARGET_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^
 	
 check: tests functional_tests $(DEBUG_LIB)
-	./tests_suite
-	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
-
-checkv: tests functional_tests $(DEBUG_LIB)
 	./tests_suite --verbose
 	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
+# 	common commands with preload
+	LD_PRELOAD=./$(DEBUG_LIB) ls
+	LD_PRELOAD=./$(DEBUG_LIB) ls -la
+	LD_PRELOAD=./$(DEBUG_LIB) factor 20 30 40 50 60 70 80 90
+	LD_PRELOAD=./$(DEBUG_LIB) ip a
+	LD_PRELOAD=./$(DEBUG_LIB) tar -cf malloc.tar $(DEBUG_LIB)
+	rm malloc.tar
+	LD_PRELOAD=./$(DEBUG_LIB) find /
+	LD_PRELOAD=./$(DEBUG_LIB) tree /
+	LD_PRELOAD=./$(DEBUG_LIB) od $(DEBUG_LIB)
+	LD_PRELOAD=./$(DEBUG_LIB) git status
+	LD_PRELOAD=./$(DEBUG_LIB) less Makefile
+	LD_PRELOAD=./$(DEBUG_LIB) clang -h
+
+# 	multithread with preload
+# 	TODO
 
 functional_tests: LDFLAGS += -lm -lpthread
 functional_tests: CFLAGS = -std=c99 -g $(DEBUG_MACRO)
@@ -63,8 +75,6 @@ $(OBJ_TESTS): CFLAGS += $(DEBUG_MACRO)
 
 $(OBJS_AND_LIB_DEBUG): CFLAGS += $(DEBUG_MACRO)
 	
-
-
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
@@ -82,4 +92,4 @@ clean:
 	tests_suite tests/test_main.o tests/criterion_debug.o \
 	test_main debug_criterion functional_tests
 
-.PHONY: all $(TARGET_LIB) clean functional_tests
+.PHONY: all $(TARGET_LIB) check clean functional_tests
