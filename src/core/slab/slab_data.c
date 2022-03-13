@@ -31,7 +31,6 @@ void slab_data_init(struct slab_meta *slab_meta, size_t index)
             slab_data_from_meta_index(slab_meta, index);
 
 #ifdef DEBUG
-        // ! TODO : must abort if slab_data is NULL
         assert(slab_data);
 #endif
         if (slab_data)

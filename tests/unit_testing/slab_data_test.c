@@ -1,5 +1,6 @@
 #include <criterion/criterion.h>
 
+#include "cast.h"
 #include "maths.h"
 #include "slab.h"
 
@@ -82,11 +83,11 @@ Test(slab_data_init, basic)
 
         cr_assert_eq(
             slab_data_i->canary_head,
-            CANARY_HEAD_FUNCTION((size_t)slab_data_i->my_meta_with_offset));
+            (CANARY_HEAD_FUNCTION((size_t)slab_data_i->my_meta_with_offset)));
 
         cr_assert_eq(
             slab_data_i->canary_tail,
-            CANARY_TAIL_FUNCTION((size_t)slab_data_i->my_meta_with_offset));
+            (CANARY_TAIL_FUNCTION((size_t)slab_data_i->my_meta_with_offset)));
 
         cr_assert_eq(slab_data_i->my_meta_with_offset,
                      slab_group->slabs_meta->slab_allocated + i);
