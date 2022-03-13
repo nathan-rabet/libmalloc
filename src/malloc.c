@@ -38,6 +38,10 @@ __attribute__((visibility("default"))) void *malloc(size_t size)
         if (!slab_data)
             return NULL;
 
+        // YES, I know that this is a bit of a hack.
+        bool a = debug_check_slab_data_access(slab_data, size, false);
+        (void)a;
+
 #ifdef DEBUG
         assert(debug_check_slab_data_access(slab_data, size, false));
 #endif
@@ -98,7 +102,7 @@ __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
         }
 
 #ifdef DEBUG
-        assert(debug_check_slab_data_access(slab_data, total_size, false));
+        assert(debug_check_slab_data_access(slab_data, total_size, true));
 #endif
 
         return &slab_data->data;
@@ -126,14 +130,13 @@ __attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
         struct slab_meta *old_slab_meta =
             page_begin(slab_data->my_meta_with_offset);
 
-        if (size <= power_2(old_slab_meta->common_group->size_multiplicity))
+        if (size <= get_slab_raw_size(old_slab_meta))
             return ptr;
 
         char *new_ptr = malloc(size);
         if (new_ptr)
         {
-            size_t old_size =
-                power_2(old_slab_meta->common_group->size_multiplicity);
+            size_t old_size = get_slab_raw_size(old_slab_meta);
             size_t copy_size = MIN(old_size, size);
             memcpy(new_ptr, ptr, copy_size);
 

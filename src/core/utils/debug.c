@@ -3,6 +3,7 @@
 #include "cast.h"
 #include "maths.h"
 #include "page.h"
+#ifdef DEBUG
 
 bool debug_check_slab_data_access(struct slab_data *slab_data, size_t size,
                                   bool is_virgin)
@@ -34,3 +35,4 @@ bool debug_calloc_slab_data_check_validity(struct slab_data *slab_data_old,
 
     return true;
 }
+#endif

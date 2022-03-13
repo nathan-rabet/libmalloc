@@ -1,10 +1,10 @@
 
 #ifndef DEBUG_H
 #define DEBUG_H
+#ifdef DEBUG
+#    include <stdbool.h>
 
-#include <stdbool.h>
-
-#include "slab.h"
+#    include "slab.h"
 
 /**
  * @brief Check if a slab_data is valid (and doesn't SIGSEGV).
@@ -32,4 +32,5 @@ bool debug_calloc_slab_data_check_validity(struct slab_data *slab_data_old,
                                            size_t old_size,
                                            struct slab_data *slab_data_new,
                                            size_t new_size);
+#endif /* DEBUG */
 #endif // DEBUG_H

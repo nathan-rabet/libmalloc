@@ -28,7 +28,7 @@ library_debug: $(DEBUG_LIB)
 $(DEBUG_LIB): CFLAGS += -g -fPIC -fno-builtin $(DEBUG_MACRO) -O0
 $(DEBUG_LIB): LDFLAGS += -Wl,--no-undefined -shared -fsanitize=undefined
 $(DEBUG_LIB): $(OBJS_AND_LIB)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(DEBUG_MACRO) $(LDFLAGS) -o $@ $^
 
 library: $(TARGET_LIB)
 $(TARGET_LIB): CFLAGS += -fvisibility=hidden -fPIC -fno-builtin
