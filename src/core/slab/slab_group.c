@@ -14,7 +14,7 @@ struct slab_group *slab_group_create(uint8_t size_multiplicity,
     struct slab_group *new_slab_group =
         mmap(NULL, sizeof(struct slab_group), PROT_READ | PROT_WRITE,
              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (new_slab_group == NULL)
+    if (new_slab_group == MAP_FAILED)
         return NULL;
 
     new_slab_group->size_multiplicity = size_multiplicity;

@@ -4,6 +4,9 @@
 #include "cast.h"
 #include "maths.h"
 #include "slab.h"
+
+#define MALLOC_ALIGNMENT 16
+
 size_t get_slab_raw_size(struct slab_meta *slabs_meta)
 {
 #ifdef DEBUG
@@ -41,7 +44,7 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
     struct slab_meta *new_slab_meta =
         mmap(NULL, SLAB_HEADER_META_SIZE, PROT_READ | PROT_WRITE,
              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (new_slab_meta == NULL)
+    if (new_slab_meta == MAP_FAILED)
         return NULL;
 
     // Add to head of linked list
@@ -67,11 +70,16 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
             new_slab_meta->max_handled_slabs = 1;
     }
 
+    slab_size = get_meta_size(new_slab_meta);
     // Allocate the slabs
-    new_slab_meta->slabs_data = mmap(NULL, slab_size, PROT_READ | PROT_WRITE,
-                                     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    new_slab_meta->slabs_data =
+        mmap(NULL, slab_size + MALLOC_ALIGNMENT, PROT_READ | PROT_WRITE,
+             MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-    if (new_slab_meta->slabs_data == NULL)
+    new_slab_meta->slabs_data += MALLOC_ALIGNMENT
+        - cast_ptr_to_size_t(new_slab_meta->slabs_data) % MALLOC_ALIGNMENT;
+
+    if (new_slab_meta->slabs_data == MAP_FAILED)
     {
         // Free the new slab meta
         if (munmap(new_slab_meta, SLAB_HEADER_META_SIZE) == -1)
@@ -155,7 +163,7 @@ bool slab_meta_delete(struct slab_meta *slab_meta)
         slab_meta->common_group->slabs_meta = returned_slab_meta;
 
     // Delete slab_meta & the corresponding slab_data's
-    if (munmap(slab_meta->slabs_data, slab_size) == -1
+    if (munmap(page_begin(slab_meta->slabs_data), slab_size) == -1
         || munmap(slab_meta, sizeof(struct slab_meta)) == -1)
         return NULL;
 
@@ -271,7 +279,7 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
     {
         slab_meta->slab_allocated[index] = false;
         cache_add_data(&slab_meta->common_group->cache, slab_meta, index,
-                       slab_meta->slab_allocated[index]);
+                       slab_meta->slab_dirty[index]);
     }
 
     return true;

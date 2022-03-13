@@ -1,7 +1,9 @@
+#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
 #include "cast.h"
+#include "debug.h"
 #include "maths.h"
 #include "overflow.h"
 #include "slab.h"
@@ -36,6 +38,14 @@ __attribute__((visibility("default"))) void *malloc(size_t size)
         if (!slab_data)
             return NULL;
 
+        // YES, I know that this is a bit of a hack.
+        bool a = debug_check_slab_data_access(slab_data, size, false);
+        (void)a;
+
+#ifdef DEBUG
+        assert(debug_check_slab_data_access(slab_data, size, false));
+#endif
+
         return &slab_data->data;
     }
 
@@ -47,43 +57,11 @@ __attribute__((visibility("default"))) void free(void *ptr)
     if (ptr)
     {
         char *p = cast_ptr(ptr);
-        struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
+        struct slab_data *slab_data =
+            cast_ptr(p - SLAB_HEADER_DATA_SIZE_NO_PADDING);
+
         slab_data_free(slab_data);
     }
-}
-
-__attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
-{
-    if (!ptr)
-        return malloc(size);
-
-    if (size == 0)
-    {
-        free(ptr);
-        return NULL;
-    }
-
-    char *p = cast_ptr(ptr);
-    struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
-
-    if (coin_coin(slab_data))
-    {
-        char *new_alloc = malloc(size);
-        if (new_alloc)
-        {
-            struct slab_meta *slab_meta =
-                page_begin(slab_data->my_meta_with_offset);
-            size_t old_size =
-                power_2(slab_meta->common_group->size_multiplicity);
-            size_t copy_size = MIN(old_size, size);
-            memcpy(new_alloc, ptr, copy_size);
-            free(ptr);
-        }
-
-        return new_alloc;
-    }
-
-    return NULL;
 }
 
 __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
@@ -124,7 +102,58 @@ __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
             return NULL;
         }
 
+#ifdef DEBUG
+        assert(debug_check_slab_data_access(slab_data, total_size, true));
+#endif
+
         return &slab_data->data;
+    }
+
+    return NULL;
+}
+
+__attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
+{
+    if (!ptr)
+        return malloc(size);
+
+    if (size == 0)
+    {
+        free(ptr);
+        return NULL;
+    }
+
+    char *p = cast_ptr(ptr);
+    struct slab_data *slab_data =
+        cast_ptr(p - SLAB_HEADER_DATA_SIZE_NO_PADDING);
+
+    if (coin_coin(slab_data))
+    {
+        struct slab_meta *old_slab_meta =
+            page_begin(slab_data->my_meta_with_offset);
+
+        if (size <= get_slab_raw_size(old_slab_meta))
+            return ptr;
+
+        char *new_ptr = malloc(size);
+        if (new_ptr)
+        {
+            size_t old_size = get_slab_raw_size(old_slab_meta);
+            size_t copy_size = MIN(old_size, size);
+            memcpy(new_ptr, ptr, copy_size);
+
+#ifdef DEBUG
+            struct slab_data *new_slab_data =
+                cast_ptr(new_ptr - SLAB_HEADER_DATA_SIZE_NO_PADDING);
+
+            assert(debug_calloc_slab_data_check_validity(slab_data, old_size,
+                                                         new_slab_data, size));
+#endif
+
+            free(ptr);
+        }
+
+        return new_ptr;
     }
 
     return NULL;

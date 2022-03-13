@@ -51,20 +51,24 @@ struct slab_meta
                                          // Used for calloc()
 };
 
-#define SLAB_HEADER_DATA_SIZE (sizeof(bool *) + 2 * sizeof(uint64_t))
 /**
  * @brief A slab_data is where the user data is stored.
+ *
+ * A slab_data is aligned on 32 bits (so compliant with the 16 bits alignment)
  *
  * All the allocation functions will return the address of a data[].
  * (and not the address of slab_data)
  */
-struct slab_data
+struct __attribute__((packed)) __attribute__((aligned(32))) slab_data
 {
     uint64_t canary_tail; // Tail canary (to detect foward memory corruption).
     bool *my_meta_with_offset; // Meta slab + index of the slab meta.
     uint64_t canary_head; // Head canary (to detect backward memory corruption).
     byte_t data[]; // Slab raw data (user data).
 };
+
+#define SLAB_HEADER_DATA_SIZE (sizeof(struct slab_data))
+#define SLAB_HEADER_DATA_SIZE_NO_PADDING (sizeof(uint64_t) * 2 + sizeof(bool *))
 
 // ----------------------------------------------------------------------------
 // ? Slab group
