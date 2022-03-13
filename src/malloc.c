@@ -38,10 +38,6 @@ __attribute__((visibility("default"))) void *malloc(size_t size)
         if (!slab_data)
             return NULL;
 
-        // YES, I know that this is a bit of a hack.
-        bool a = debug_check_slab_data_access(slab_data, size, false);
-        (void)a;
-
 #ifdef DEBUG
         assert(debug_check_slab_data_access(slab_data, size, false));
 #endif
