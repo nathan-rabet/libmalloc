@@ -39,7 +39,7 @@ __attribute__((visibility("default"))) void *malloc(size_t size)
             return NULL;
 
 #ifdef DEBUG
-        assert(debug_check_slab_data_access(slab_data, false));
+        assert(debug_check_slab_data_access(slab_data, size, false));
 #endif
 
         return &slab_data->data;
@@ -55,50 +55,8 @@ __attribute__((visibility("default"))) void free(void *ptr)
         char *p = cast_ptr(ptr);
         struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
 
-#ifdef DEBUG
-        assert(debug_check_slab_data_access(slab_data, false));
-#endif
-
         slab_data_free(slab_data);
     }
-}
-
-__attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
-{
-    if (!ptr)
-        return malloc(size);
-
-    if (size == 0)
-    {
-        free(ptr);
-        return NULL;
-    }
-
-    char *p = cast_ptr(ptr);
-    struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
-
-#ifdef DEBUG
-    assert(debug_check_slab_data_access(slab_data, false));
-#endif
-
-    if (coin_coin(slab_data))
-    {
-        char *new_alloc = malloc(size);
-        if (new_alloc)
-        {
-            struct slab_meta *slab_meta =
-                page_begin(slab_data->my_meta_with_offset);
-            size_t old_size =
-                power_2(slab_meta->common_group->size_multiplicity);
-            size_t copy_size = MIN(old_size, size);
-            memcpy(new_alloc, ptr, copy_size);
-            free(ptr);
-        }
-
-        return new_alloc;
-    }
-
-    return NULL;
 }
 
 __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
@@ -140,11 +98,58 @@ __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
         }
 
 #ifdef DEBUG
-        assert(debug_check_slab_data_access(slab_data, true));
+        assert(debug_check_slab_data_access(slab_data, total_size, false));
 #endif
 
         return &slab_data->data;
     }
 
     return NULL;
+}
+
+__attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
+{
+    if (!ptr)
+        return malloc(size);
+
+    if (size == 0)
+    {
+        free(ptr);
+        return NULL;
+    }
+
+    char *p = cast_ptr(ptr);
+    struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
+
+    if (coin_coin(slab_data))
+    {
+        struct slab_meta *old_slab_meta =
+            page_begin(slab_data->my_meta_with_offset);
+
+        if (size <= power_2(old_slab_meta->common_group->size_multiplicity))
+            return ptr;
+
+        char *new_ptr = malloc(size);
+        if (new_ptr)
+        {
+            size_t old_size =
+                power_2(old_slab_meta->common_group->size_multiplicity);
+            size_t copy_size = MIN(old_size, size);
+            memcpy(new_ptr, ptr, copy_size);
+
+#ifdef DEBUG
+            struct slab_data *new_slab_data =
+                cast_ptr(new_ptr - SLAB_HEADER_DATA_SIZE);
+
+            assert(debug_calloc_slab_data_check_validity(slab_data, old_size,
+                                                         new_slab_data, size));
+#endif
+
+            free(ptr);
+        }
+
+        return new_ptr;
+    }
+
+    return malloc(size);
 }

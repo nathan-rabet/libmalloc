@@ -1,5 +1,5 @@
 #include <stddef.h>
-
+#if 0
 __attribute__((visibility("default"))) void *aligned_alloc(size_t alignment,
                                                            size_t size)
 {
@@ -30,3 +30,4 @@ posix_memalign(void **memptr, size_t alignment, size_t size)
     (void)size;
     return 0;
 }
+#endif

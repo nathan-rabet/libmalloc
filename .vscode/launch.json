@@ -83,6 +83,67 @@
             ],
             "preLaunchTask": "make library_debug"
         },
+        {
+            "name": "LD_PRELOAD corruptionproof",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "/lib64/ld-linux-x86-64.so.2",
+            "args": [
+                "${workspaceFolder}/tests/cri/corruptionproof"
+            ],
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Wrapper LD_PRELOAD",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc_debug.so'",
+                    "ignoreFailures": false
+                },
+            ],
+            "preLaunchTask": "make library_debug"
+        },
+        {
+            "name": "LD_PRELOAD memoryfootprint",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "/lib64/ld-linux-x86-64.so.2",
+            "args": [
+                "${workspaceFolder}/tests/cri/memoryfootprint",
+                "${input:arg1Name}"
+            ],
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Wrapper LD_PRELOAD",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc_debug.so'",
+                    "ignoreFailures": false
+                },
+            ],
+            "preLaunchTask": "make library_debug"
+        },
+        {
+            "name": "LD_PRELOAD speed",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "/lib64/ld-linux-x86-64.so.2",
+            "args": [
+                "${workspaceFolder}/tests/cri/speed"
+            ],
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Wrapper LD_PRELOAD",
+                    "text": "set exec-wrapper env 'LD_PRELOAD=./libmalloc.so'",
+                    "ignoreFailures": false
+                },
+            ],
+            "preLaunchTask": "make library"
+        },
     ],
     "inputs": [
         {

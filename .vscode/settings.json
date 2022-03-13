@@ -9,6 +9,11 @@
         "stdint.h": "c",
         "cache.h": "c",
         "cmath": "c",
-        "random": "c"
+        "random": "c",
+        "debug.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c"
     }
 }

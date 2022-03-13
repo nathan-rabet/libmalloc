@@ -9,7 +9,7 @@ int main(void)
     malloc_then_free_then_malloc();
     basic1();
     basic2();
-    heap_fucker();
+    // heap_fucker();
 
     // glibc benchmarkings
     bench_malloc_sparse(42);

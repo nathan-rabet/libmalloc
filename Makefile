@@ -25,7 +25,7 @@ OBJ_TESTS = $(SRC_TESTS:.c=.o)
 all: library
 
 library_debug: $(DEBUG_LIB)
-$(DEBUG_LIB): CFLAGS += -g -fPIC -fno-builtin $(DEBUG_MACRO)
+$(DEBUG_LIB): CFLAGS += -g -fPIC -fno-builtin $(DEBUG_MACRO) -O0
 $(DEBUG_LIB): LDFLAGS += -Wl,--no-undefined -shared -fsanitize=undefined
 $(DEBUG_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -37,7 +37,7 @@ $(TARGET_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^
 	
 check: tests functional_tests $(DEBUG_LIB)
-	./tests_suite
+	CONFIG_KASAN=y ./tests_suite
 	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
 # 	common commands with preload
 	LD_PRELOAD=./$(DEBUG_LIB) ls
@@ -46,17 +46,16 @@ check: tests functional_tests $(DEBUG_LIB)
 	LD_PRELOAD=./$(DEBUG_LIB) ip a
 	LD_PRELOAD=./$(DEBUG_LIB) tar -cf malloc.tar $(DEBUG_LIB)
 	rm malloc.tar
-	LD_PRELOAD=./$(DEBUG_LIB) find /
-	LD_PRELOAD=./$(DEBUG_LIB) tree /
-	LD_PRELOAD=./$(DEBUG_LIB) od $(DEBUG_LIB)
+	LD_PRELOAD=./$(DEBUG_LIB) find .
+	LD_PRELOAD=./$(DEBUG_LIB) tree .
+	LD_PRELOAD=./$(DEBUG_LIB) od .gitignore
 	LD_PRELOAD=./$(DEBUG_LIB) git status
-	LD_PRELOAD=./$(DEBUG_LIB) less Makefile
 	LD_PRELOAD=./$(DEBUG_LIB) clang -h
 
 # 	multithread with preload
 # 	TODO
 
-functional_tests: LDFLAGS += -lm -lpthread
+functional_tests: LDFLAGS += -lm -lpthread -fsanitize=undefined
 functional_tests: CFLAGS = -std=c99 -g $(DEBUG_MACRO)
 functional_tests: $(FUNCTIONAL_OBJS)
 	$(CC) $(CFLAGS) -o functional_tests $^ $(LDFLAGS)

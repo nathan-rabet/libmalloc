@@ -41,7 +41,7 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
     struct slab_meta *new_slab_meta =
         mmap(NULL, SLAB_HEADER_META_SIZE, PROT_READ | PROT_WRITE,
              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (new_slab_meta == NULL)
+    if (new_slab_meta == MAP_FAILED)
         return NULL;
 
     // Add to head of linked list
@@ -72,7 +72,7 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
     new_slab_meta->slabs_data = mmap(NULL, slab_size, PROT_READ | PROT_WRITE,
                                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-    if (new_slab_meta->slabs_data == NULL)
+    if (new_slab_meta->slabs_data == MAP_FAILED)
     {
         // Free the new slab meta
         if (munmap(new_slab_meta, SLAB_HEADER_META_SIZE) == -1)
