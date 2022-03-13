@@ -7,9 +7,9 @@ DEBUG_MACRO = -DDEBUG
 TARGET_LIB = libmalloc.so
 DEBUG_LIB = libmalloc_debug.so
 
-SRC = src/core/slab/cache.c src/core/slab/slab_meta.c src/core/slab/slab_group.c src/core/slab/slab_data.c src/core/utils/maths.c src/core/utils/bit.c src/core/utils/cast.c src/core/utils/overflow.c
+SRC = src/core/slab/cache.c src/core/slab/slab_meta.c src/core/slab/slab_group.c src/core/slab/slab_data.c src/core/utils/maths.c src/core/utils/bit.c src/core/utils/cast.c src/core/utils/overflow.c src/core/utils/debug.c
 OBJS = $(SRC:.c=.o)
-SRC_AND_LIB = src/core/slab/cache.c src/core/slab/slab_meta.c src/core/slab/slab_group.c src/core/slab/slab_data.c src/core/utils/maths.c src/core/utils/bit.c src/core/utils/cast.c src/core/utils/overflow.c src/malloc.c src/additional_malloc.c
+SRC_AND_LIB = $(SRC) src/malloc.c src/additional_malloc.c
 OBJS_AND_LIB = $(SRC_AND_LIB:.c=.o)
 OBJS_AND_LIB_DEBUG = $(OBJS_AND_LIB)
 
@@ -26,7 +26,7 @@ all: library
 
 library_debug: $(DEBUG_LIB)
 $(DEBUG_LIB): CFLAGS += -g -fPIC -fno-builtin $(DEBUG_MACRO)
-$(DEBUG_LIB): LDFLAGS += -Wl,--no-undefined -shared
+$(DEBUG_LIB): LDFLAGS += -Wl,--no-undefined -shared -fsanitize=undefined
 $(DEBUG_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^
 
@@ -37,7 +37,7 @@ $(TARGET_LIB): $(OBJS_AND_LIB)
 	$(CC) $(LDFLAGS) -o $@ $^
 	
 check: tests functional_tests $(DEBUG_LIB)
-	./tests_suite --verbose
+	./tests_suite
 	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
 # 	common commands with preload
 	LD_PRELOAD=./$(DEBUG_LIB) ls
@@ -61,7 +61,7 @@ functional_tests: CFLAGS = -std=c99 -g $(DEBUG_MACRO)
 functional_tests: $(FUNCTIONAL_OBJS)
 	$(CC) $(CFLAGS) -o functional_tests $^ $(LDFLAGS)
 
-tests: LDFLAGS += -lm -lcriterion -fsanitize=address
+tests: LDFLAGS += -lm -lcriterion -fsanitize=address -fsanitize=undefined
 tests: CFLAGS += -g
 tests: $(OBJS) $(OBJ_TESTS)
 	$(CC) $(CFLAGS) -o tests_suite $^ $(LDFLAGS)

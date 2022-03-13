@@ -1,7 +1,9 @@
+#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
 #include "cast.h"
+#include "debug.h"
 #include "maths.h"
 #include "overflow.h"
 #include "slab.h"
@@ -36,6 +38,10 @@ __attribute__((visibility("default"))) void *malloc(size_t size)
         if (!slab_data)
             return NULL;
 
+#ifdef DEBUG
+        assert(debug_check_slab_data_access(slab_data, false));
+#endif
+
         return &slab_data->data;
     }
 
@@ -48,6 +54,11 @@ __attribute__((visibility("default"))) void free(void *ptr)
     {
         char *p = cast_ptr(ptr);
         struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
+
+#ifdef DEBUG
+        assert(debug_check_slab_data_access(slab_data, false));
+#endif
+
         slab_data_free(slab_data);
     }
 }
@@ -65,6 +76,10 @@ __attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
 
     char *p = cast_ptr(ptr);
     struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
+
+#ifdef DEBUG
+    assert(debug_check_slab_data_access(slab_data, false));
+#endif
 
     if (coin_coin(slab_data))
     {
@@ -123,6 +138,10 @@ __attribute__((visibility("default"))) void *calloc(size_t nmemb, size_t size)
             slab_data_free(slab_data);
             return NULL;
         }
+
+#ifdef DEBUG
+        assert(debug_check_slab_data_access(slab_data, true));
+#endif
 
         return &slab_data->data;
     }

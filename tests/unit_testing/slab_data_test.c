@@ -1,5 +1,6 @@
 #include <criterion/criterion.h>
 
+#include "maths.h"
 #include "slab.h"
 
 Test(slab_data_from_meta_index, offset_i)
@@ -142,3 +143,31 @@ Test(slab_data_free, null)
     slab_data_free(NULL);
 }
 #endif
+
+Test(slab_data_bench, has_enough_space)
+{
+    for (size_t i = 0; i < 20; i++)
+    {
+        struct slab_group *slab_group = slab_group_create(i, NULL);
+
+        for (size_t j = 0; j < slab_group->slabs_meta->max_handled_slabs; j++)
+        {
+            slab_meta_allocate(slab_group->slabs_meta, false);
+        }
+
+        size_t slab_size = power_2(i);
+        for (size_t j = 0; j < slab_group->slabs_meta->max_handled_slabs; j++)
+        {
+            for (size_t k = 0; k < slab_size; k++)
+            {
+                cr_assert_eq(
+                    slab_data_from_meta_index(slab_group->slabs_meta, j)
+                        ->data[k],
+                    0, "With a size of %zu, the data is not empty at index %zu",
+                    slab_size, k);
+            }
+        }
+    }
+
+    slab_group_destroy_all();
+}

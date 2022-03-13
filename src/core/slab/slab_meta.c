@@ -67,6 +67,7 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
             new_slab_meta->max_handled_slabs = 1;
     }
 
+    slab_size = get_meta_size(new_slab_meta);
     // Allocate the slabs
     new_slab_meta->slabs_data = mmap(NULL, slab_size, PROT_READ | PROT_WRITE,
                                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -271,7 +272,7 @@ bool slab_meta_free(struct slab_meta *slab_meta, size_t index)
     {
         slab_meta->slab_allocated[index] = false;
         cache_add_data(&slab_meta->common_group->cache, slab_meta, index,
-                       slab_meta->slab_allocated[index]);
+                       slab_meta->slab_dirty[index]);
     }
 
     return true;
