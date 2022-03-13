@@ -53,8 +53,7 @@ __attribute__((visibility("default"))) void free(void *ptr)
     if (ptr)
     {
         char *p = cast_ptr(ptr);
-        struct slab_data *slab_data =
-            cast_ptr(p - SLAB_HEADER_DATA_SIZE_NO_PADDING);
+        struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
 
         slab_data_free(slab_data);
     }
@@ -120,8 +119,7 @@ __attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
     }
 
     char *p = cast_ptr(ptr);
-    struct slab_data *slab_data =
-        cast_ptr(p - SLAB_HEADER_DATA_SIZE_NO_PADDING);
+    struct slab_data *slab_data = cast_ptr(p - SLAB_HEADER_DATA_SIZE);
 
     if (coin_coin(slab_data))
     {
@@ -140,7 +138,7 @@ __attribute__((visibility("default"))) void *realloc(void *ptr, size_t size)
 
 #ifdef DEBUG
             struct slab_data *new_slab_data =
-                cast_ptr(new_ptr - SLAB_HEADER_DATA_SIZE_NO_PADDING);
+                cast_ptr(new_ptr - SLAB_HEADER_DATA_SIZE);
 
             assert(debug_calloc_slab_data_check_validity(slab_data, old_size,
                                                          new_slab_data, size));

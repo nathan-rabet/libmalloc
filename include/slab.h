@@ -59,16 +59,18 @@ struct slab_meta
  * All the allocation functions will return the address of a data[].
  * (and not the address of slab_data)
  */
-struct __attribute__((packed)) __attribute__((aligned(32))) slab_data
+struct __attribute__((packed)) slab_data
 {
-    uint64_t canary_tail; // Tail canary (to detect foward memory corruption).
-    bool *my_meta_with_offset; // Meta slab + index of the slab meta.
-    uint64_t canary_head; // Head canary (to detect backward memory corruption).
+    uint64_t canary_tail __attribute__((
+        aligned(8))); // Tail canary (to detect foward memory corruption).
+    bool *my_meta_with_offset
+        __attribute__((aligned(16))); // Meta slab + index of the slab meta.
+    uint64_t canary_head __attribute__((
+        aligned(8))); // Head canary (to detect backward memory corruption).
     byte_t data[]; // Slab raw data (user data).
 };
 
 #define SLAB_HEADER_DATA_SIZE (sizeof(struct slab_data))
-#define SLAB_HEADER_DATA_SIZE_NO_PADDING (sizeof(uint64_t) * 2 + sizeof(bool *))
 
 // ----------------------------------------------------------------------------
 // ? Slab group

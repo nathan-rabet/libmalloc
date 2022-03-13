@@ -153,7 +153,7 @@ bool slab_meta_delete(struct slab_meta *slab_meta)
     cache_delete_all_occ_meta(&slab_meta->common_group->cache, slab_meta);
 
     // Get the size of the slab meta.
-    size_t slab_size = get_meta_size(slab_meta);
+    size_t slab_size = get_meta_size(slab_meta) + MALLOC_ALIGNMENT;
 
     if (!returned_slab_meta)
         // If there is no more slab meta, we can delete the slab group
