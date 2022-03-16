@@ -5,7 +5,7 @@
 #include "maths.h"
 #include "slab.h"
 
-#define MALLOC_ALIGNMENT 16
+#define MALLOC_ALIGNMENT sizeof(long double)
 
 size_t get_slab_raw_size(struct slab_meta *slabs_meta)
 {
@@ -72,12 +72,8 @@ struct slab_meta *slab_meta_create(struct slab_meta *linked_slab_meta,
 
     slab_size = get_meta_size(new_slab_meta);
     // Allocate the slabs
-    new_slab_meta->slabs_data =
-        mmap(NULL, slab_size + MALLOC_ALIGNMENT, PROT_READ | PROT_WRITE,
-             MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-    new_slab_meta->slabs_data += MALLOC_ALIGNMENT
-        - cast_ptr_to_size_t(new_slab_meta->slabs_data) % MALLOC_ALIGNMENT;
+    new_slab_meta->slabs_data = mmap(NULL, slab_size, PROT_READ | PROT_WRITE,
+                                     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     if (new_slab_meta->slabs_data == MAP_FAILED)
     {
@@ -153,7 +149,7 @@ bool slab_meta_delete(struct slab_meta *slab_meta)
     cache_delete_all_occ_meta(&slab_meta->common_group->cache, slab_meta);
 
     // Get the size of the slab meta.
-    size_t slab_size = get_meta_size(slab_meta) + MALLOC_ALIGNMENT;
+    size_t slab_size = get_meta_size(slab_meta);
 
     if (!returned_slab_meta)
         // If there is no more slab meta, we can delete the slab group
