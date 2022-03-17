@@ -13,7 +13,12 @@ This type of allocator use 4 types of objects :
 - SLAB meta
 - SLABS
 
+![Slab allocator schema](docs/slab_allocator_schema.svg)
+
 ## SLAB
+
+
+![Slab data schema](docs/slab_data_schema.svg)
 
 A SLAB is a block of memory that is used to store objects. It is composed of :
 
