@@ -1,0 +1,70 @@
+digraph {
+    
+    node [shape=box]
+
+    SLAB_ALLOCATOR_START[shape=point, style=filled, fillcolor=white]
+    SLAB_GROUP_1   [style=filled, fillcolor=lightgrey, label="SLAB GROUP 1"]
+    SLAB_GROUP_2   [style=filled, fillcolor=lightgrey, label="SLAB GROUP 2"]
+    SLAB_GROUP_3   [style=filled, fillcolor=lightgrey, label="SLAB GROUP 3"]
+    SLAB_GROUP_ETC [style=filled, fillcolor=lightgrey, label="..."]
+    
+    SLAB_CACHE_1 [shape=underline, label="CACHE"]
+    SLAB_CACHE_2 [shape=underline, label="CACHE"]
+    SLAB_CACHE_3 [shape=underline, label="CACHE"]
+    
+    SLAB_GROUP_1 -> SLAB_CACHE_1
+    SLAB_GROUP_2 -> SLAB_CACHE_2
+    SLAB_GROUP_3 -> SLAB_CACHE_3
+    
+    {rank = same; SLAB_GROUP_1 SLAB_CACHE_1 }
+    {rank = same; SLAB_GROUP_2 SLAB_CACHE_2 }
+    {rank = same; SLAB_GROUP_3 SLAB_CACHE_3 }
+
+     // SLAB GROUP linked list
+    SLAB_ALLOCATOR_START -> SLAB_GROUP_1 -> SLAB_GROUP_2 -> SLAB_GROUP_3 -> SLAB_GROUP_ETC
+    {rank = same; SLAB_ALLOCATOR_START SLAB_GROUP_1 SLAB_GROUP_2 SLAB_GROUP_3 SLAB_GROUP_ETC}
+
+    SLAB_META_1a   [label="SLAB META 1"]
+    SLAB_META_2a   [label="SLAB META 1"]
+    SLAB_META_3a   [label="SLAB META 1"]
+
+    SLAB_META_1b   [label="SLAB META 2"]
+    SLAB_META_2b   [label="SLAB META 2"]
+    SLAB_META_3b   [label="SLAB META 2"]
+
+    SLAB_META_1etc [label="..."]
+    SLAB_META_2etc [label="..."]
+    SLAB_META_3etc [label="..."]
+
+    SLAB_GROUP_1 -> SLAB_META_1a -> SLAB_META_1b -> SLAB_META_1etc
+    SLAB_GROUP_2 -> SLAB_META_2a -> SLAB_META_2b -> SLAB_META_2etc
+    SLAB_GROUP_3 -> SLAB_META_3a -> SLAB_META_3b -> SLAB_META_3etc
+
+    {rankdir = LR; SLAB_GROUP_1 SLAB_META_1a SLAB_META_2a SLAB_META_3a}
+    {rankdir = LR; SLAB_GROUP_2 SLAB_META_1b SLAB_META_2b SLAB_META_3b}
+    {rankdir = LR; SLAB_GROUP_3 SLAB_META_1etc SLAB_META_2etc SLAB_META_3etc}
+
+    node [];
+    slab11 [shape=note, label="SLABS"];
+    slab12 [shape=note, label="SLABS"];
+    slab21 [shape=note, label="SLABS"];
+    slab22 [shape=note, label="SLABS"];
+    slab31 [shape=note, label="SLABS"];
+    slab32 [shape=note, label="SLABS"];
+    
+    SLAB_META_1a -> slab11
+    SLAB_META_1b -> slab12
+    SLAB_META_2a -> slab21
+    SLAB_META_2b -> slab22
+    SLAB_META_3a -> slab31
+    SLAB_META_3b -> slab32
+
+    { rank = same; SLAB_META_1a slab11 }
+    { rank= same;  SLAB_META_1a slab11 }
+    { rank= same;  SLAB_META_1b slab12 }
+    { rank= same;  SLAB_META_2a slab21 }
+    { rank= same;  SLAB_META_2b slab22 }
+    { rank= same;  SLAB_META_3a slab31 }
+    { rank= same;  SLAB_META_3b slab32 }
+
+}

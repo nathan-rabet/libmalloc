@@ -60,7 +60,6 @@ A SLAB group is composed of :
 - A pointer to the first SLAB meta
 - A cache of free SLABs
 
-
 ## Minimum SLAB group
 
 A minimum SLAB group is a SLAB group which have a size as power of 2 immediatly superior or equal to the size of the object.
