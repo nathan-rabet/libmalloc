@@ -1,5 +1,7 @@
 # `malloc(3)` : the standard dynamic memory allocator
 
+[![Tests suite](https://github.com/nathan-rabet/libmalloc/actions/workflows/tests_suite.yml/badge.svg)](https://github.com/nathan-rabet/libmalloc/actions/workflows/tests_suite.yml)
+
 ## Project motivations
 
 The project is initialy motivated by EPITA to understand how allocators work and what types of algorithms we can use for certain type of allocations. In order to implement the library in a kernel, I decided to implement the standard `malloc(3)` with a fast, secure and reliable algorithm which is really used in modern systems libraries (like the *glibc*) : the **SLAB allocator** method.
