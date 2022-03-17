@@ -1,0 +1,3 @@
+digraph {
+    slab_data [shape="record", label=" {<tail> canary | <addr> SLAB meta address | <head> canary | <user_data> user data}"];
+}
