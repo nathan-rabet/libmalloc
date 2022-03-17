@@ -38,9 +38,9 @@ $(TARGET_LIB): $(OBJS_AND_LIB)
 	
 check: tests functional_tests $(DEBUG_LIB)
 	CONFIG_KASAN=y ./tests_suite
-	@tput setaf 2; echo "Unit testing passed, executing glibc stress test"; tput sgr0
+	@export TERM=xterm; tput setaf 2; echo "Unit testing passed, executing glibc stress test"; tput sgr0
 	ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD=./$(DEBUG_LIB) ./functional_tests
-	@tput setaf 2; echo "glibc stress test passed, executing common system programs"; tput sgr0
+	@export TERM=xterm; tput setaf 2; echo "glibc stress test passed, executing common system programs"; tput sgr0
 # 	common commands with preload
 	LD_PRELOAD=./$(DEBUG_LIB) ls
 	LD_PRELOAD=./$(DEBUG_LIB) ls -la
