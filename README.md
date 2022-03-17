@@ -34,6 +34,18 @@ To compile the library in debug mode (debug symbols + `assert(3)` enabled), you 
 
 Use  `make clean` command to clean the compiled objects.
 
+## Preloading the library
+
+Once compiled as `libmalloc.so`, you can use this malloc implementation on your programs using the `LD_PRELOAD` bash environement variable :
+
+```bash
+LD_PRELOAD=<path/to>/libmalloc.so ./<your program>
+```
+
+Where `<path/to>` is the path where `libmalloc.so` is and where `<your program>` is the name (path included) of the program you want to execute.
+
+This way, `<your program>` will preload the `libmalloc.so` functions before loading the system's one. Thus `libmalloc.so` functions will be used instead of the system's ones.
+
 ## Implementation & architecture
 
 To understand the implementation, you should read the [IMPLEMENTATION.md](IMPLEMENTATION.md) file.
